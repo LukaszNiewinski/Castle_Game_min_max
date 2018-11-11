@@ -99,35 +99,47 @@ class App(FunContainer):
     numOfCells = 19
     cellWidth = np.floor_divide(windowWidth, numOfCells)
     cellHeight = np.floor_divide(windowHeight, numOfCells)
+    linesColor = Color(25, 25, 110)
     windowName = "Castle game"
 
     def __init__(self):
         super().__init__()
         pygame.init()
+        self.board = self.board_init()
         self.screen = pygame.display.set_mode((self.windowWidth, self.windowHeight))
         pygame.display.set_caption(self.windowName)
         self.background = FunContainer.load_image("background.jpg")
         self.background = pygame.transform.scale(self.background, (self.windowWidth, self.windowHeight))
+        self.draw_lines()
         self.screen.blit(self.background, (0, 0))
         pygame.display.update()
         self.clock = pygame.time.Clock()
         self.whiteBall = WhiteBall()
         self.blackBall = BlackBall()
         self.abc = pygame.sprite.RenderPlain((self.whiteBall, self.blackBall))
-        self.board = self.board_init()
         self.app_loop()
 
     def board_init(self):
-        board = np.array([[0]*19], dtype=Rect)
+        board = np.array([[Rect([0]*4)]*19]*19)
         for i in range(self.numOfCells):
             for j in range(self.numOfCells):
                 board[i][j] = Rect(i*self.cellWidth, j*self.cellWidth, self.cellWidth-1, self.cellHeight-1)
-            return board
+        return board
 
     def position2board(self, pos):
         x = np.floor_divide(pos[0], self.cellWidth)
         y = np.floor_divide(pos[1], self.cellHeight)
         return x, y
+
+    def draw_lines(self):
+        for i in range(self.numOfCells):
+            start = Rect(self.board[i][0]).midtop
+            stop = Rect(self.board[i][self.numOfCells-1]).midbottom
+            pygame.draw.line(self.background, self.linesColor, start, stop, 1)
+        for j in range(self.numOfCells):
+            start = Rect(self.board[0][j]).midleft
+            stop = Rect(self.board[self.numOfCells-1][j]).midright
+            pygame.draw.line(self.background, self.linesColor, start, stop, 1)
 
     def app_loop(self):
         while 1:
@@ -139,7 +151,9 @@ class App(FunContainer):
                     return
                 elif event.type == MOUSEBUTTONDOWN:
                     pos = pygame.mouse.get_pos()
-                    print(self.position2board(pos))
+                    onboard = self.position2board(pos)
+                    print(onboard)
+                    print(type(self.board[onboard[0]][onboard[1]]))
                     for s in self.abc.sprites():
                         if s.rect.collidepoint(pos):
                             print("yo")
