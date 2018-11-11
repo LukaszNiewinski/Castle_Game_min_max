@@ -83,7 +83,7 @@ class BlackBall(WhiteBall):
         self.imageBase = pygame.transform.scale(self.image, (self.resolution[0], self.resolution[1]))
         self.image = self.imageBase
         self.rect = self.image.get_rect()
-        self.rect.move_ip(100, 100)
+        self.rect.move_ip(200, 100)
 
     def update(self):
         pos = pygame.mouse.get_pos()
@@ -92,10 +92,13 @@ class BlackBall(WhiteBall):
         else:
             self.image = self.imageBase
 
+
 class App(FunContainer):
     windowWidth = 800
     windowHeight = 800
     numOfCells = 19
+    cellWidth = np.floor_divide(windowWidth, numOfCells)
+    cellHeight = np.floor_divide(windowHeight, numOfCells)
     windowName = "Castle game"
 
     def __init__(self):
@@ -108,15 +111,23 @@ class App(FunContainer):
         self.screen.blit(self.background, (0, 0))
         pygame.display.update()
         self.clock = pygame.time.Clock()
-        self.white_ball = WhiteBall()
-        self.abc = pygame.sprite.RenderPlain((self.white_ball))
+        self.whiteBall = WhiteBall()
+        self.blackBall = BlackBall()
+        self.abc = pygame.sprite.RenderPlain((self.whiteBall, self.blackBall))
+        self.board = self.board_init()
         self.app_loop()
 
-        self.board = np.array([], [])
-
     def board_init(self):
-        for i in range(19):
-            for j in range(19): pass
+        board = np.array([[0]*19], dtype=Rect)
+        for i in range(self.numOfCells):
+            for j in range(self.numOfCells):
+                board[i][j] = Rect(i*self.cellWidth, j*self.cellWidth, self.cellWidth-1, self.cellHeight-1)
+            return board
+
+    def position2board(self, pos):
+        x = np.floor_divide(pos[0], self.cellWidth)
+        y = np.floor_divide(pos[1], self.cellHeight)
+        return x, y
 
     def app_loop(self):
         while 1:
@@ -127,7 +138,12 @@ class App(FunContainer):
                 elif event.type == KEYDOWN and event.key == K_ESCAPE:
                     return
                 elif event.type == MOUSEBUTTONDOWN:
-                    print(pygame.mouse.get_pos())
+                    pos = pygame.mouse.get_pos()
+                    print(self.position2board(pos))
+                    for s in self.abc.sprites():
+                        if s.rect.collidepoint(pos):
+                            print("yo")
+
 
             self.abc.update()
             self.abc.clear(self.screen, self.background)
