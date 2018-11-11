@@ -150,6 +150,15 @@ class App(FunContainer):
         self.center_blit(self.background, blueThrone, Rect(self.board[3][9]))
         self.center_blit(self.background, redThrone, Rect(self.board[15][9]))
 
+    def wall_coordinates_init(self):
+        wallCoordinates = []
+        for i in range(1, 8):
+            wallCoordinates.append((i, 2))
+            wallCoordinates.append((i, 16))
+        for i in range (11, 18):
+            wallCoordinates.append((i, 2))
+            wallCoordinates.append((i, 16))
+
     def draw_walls(self):
         pass
 
