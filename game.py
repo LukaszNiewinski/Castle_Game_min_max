@@ -52,14 +52,45 @@ class WhiteBall(pygame.sprite.Sprite):
 
     def __init__(self):
         super().__init__()
-        self.image = FunContainer.load_image("black-ball.jpg", -1)
-        self.image= pygame.transform.scale(self.image, (self.resolution[0], self.resolution[1]))
+        self.image = FunContainer.load_image("white-ball.jpg", -1)
+        self.imageOnFocus = pygame.transform.scale(self.image, (self.resolution[0]+5, self.resolution[1]+5))
+        self.imageBase = pygame.transform.scale(self.image, (self.resolution[0], self.resolution[1]))
+        self.image = self.imageBase
         self.rect = self.image.get_rect()
         self.rect.move_ip(100, 100)
 
-        def update():
-            pos = pygame.mouse.get_pos()
-            self.rect.midtop = pos
+        self.clicked = False
+
+    def update(self):
+        pos = pygame.mouse.get_pos()
+        if self.rect.collidepoint(pos):
+            self.image = self.imageOnFocus
+        else:
+            self.image = self.imageBase
+
+    def click(self):
+        self.clicked = True
+
+    def unclick(self):
+        self.clicked = False
+
+
+class BlackBall(WhiteBall):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = FunContainer.load_image("black-ball.jpg", -1)
+        self.imageOnFocus = pygame.transform.scale(self.image, (self.resolution[0]+5, self.resolution[1]+5))
+        self.imageBase = pygame.transform.scale(self.image, (self.resolution[0], self.resolution[1]))
+        self.image = self.imageBase
+        self.rect = self.image.get_rect()
+        self.rect.move_ip(100, 100)
+
+    def update(self):
+        pos = pygame.mouse.get_pos()
+        if self.rect.collidepoint(pos):
+            self.image = self.imageOnFocus
+        else:
+            self.image = self.imageBase
 
 class App(FunContainer):
     windowWidth = 800
@@ -78,8 +109,14 @@ class App(FunContainer):
         pygame.display.update()
         self.clock = pygame.time.Clock()
         self.white_ball = WhiteBall()
-        self.abc = pygame.sprite.RenderUpdates(self.white_ball)
+        self.abc = pygame.sprite.RenderPlain((self.white_ball))
         self.app_loop()
+
+        self.board = np.array([], [])
+
+    def board_init(self):
+        for i in range(19):
+            for j in range(19): pass
 
     def app_loop(self):
         while 1:
@@ -91,8 +128,9 @@ class App(FunContainer):
                     return
                 elif event.type == MOUSEBUTTONDOWN:
                     print(pygame.mouse.get_pos())
+
             self.abc.update()
-            self.screen.blit(self.background, (0, 0))
+            self.abc.clear(self.screen, self.background)
             self.abc.draw(self.screen)
             pygame.display.update()
 
