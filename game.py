@@ -46,6 +46,12 @@ class FunContainer:
             raise SystemExit
         return sound
 
+    @classmethod
+    def center_blit(cls, destination: pygame.Surface, image: pygame.Surface, area: pygame.Rect):
+        imageRect = image.get_rect()
+        imageRect.center = area.center
+        destination.blit(image, imageRect)
+
 
 class WhiteBall(pygame.sprite.Sprite):
     resolution = (35, 35)
@@ -85,13 +91,6 @@ class BlackBall(WhiteBall):
         self.rect = self.image.get_rect()
         self.rect.move_ip(200, 100)
 
-    def update(self):
-        pos = pygame.mouse.get_pos()
-        if self.rect.collidepoint(pos):
-            self.image = self.imageOnFocus
-        else:
-            self.image = self.imageBase
-
 
 class App(FunContainer):
     windowWidth = 800
@@ -111,6 +110,7 @@ class App(FunContainer):
         self.background = FunContainer.load_image("background.jpg")
         self.background = pygame.transform.scale(self.background, (self.windowWidth, self.windowHeight))
         self.draw_lines()
+        self.draw_thrones()
         self.screen.blit(self.background, (0, 0))
         pygame.display.update()
         self.clock = pygame.time.Clock()
@@ -123,23 +123,35 @@ class App(FunContainer):
         board = np.array([[Rect([0]*4)]*19]*19)
         for i in range(self.numOfCells):
             for j in range(self.numOfCells):
-                board[i][j] = Rect(i*self.cellWidth, j*self.cellWidth, self.cellWidth-1, self.cellHeight-1)
+                board[j][i] = Rect(i*self.cellWidth, j*self.cellWidth, self.cellWidth-1, self.cellHeight-1)
         return board
 
     def position2board(self, pos):
-        x = np.floor_divide(pos[0], self.cellWidth)
-        y = np.floor_divide(pos[1], self.cellHeight)
+        x = np.floor_divide(pos[1], self.cellWidth)
+        y = np.floor_divide(pos[0], self.cellHeight)
         return x, y
 
     def draw_lines(self):
         for i in range(self.numOfCells):
-            start = Rect(self.board[i][0]).midtop
-            stop = Rect(self.board[i][self.numOfCells-1]).midbottom
+            start = Rect(self.board[i][0]).midleft
+            stop = Rect(self.board[i][self.numOfCells-1]).midright
             pygame.draw.line(self.background, self.linesColor, start, stop, 1)
         for j in range(self.numOfCells):
-            start = Rect(self.board[0][j]).midleft
-            stop = Rect(self.board[self.numOfCells-1][j]).midright
+            start = Rect(self.board[0][j]).midtop
+            stop = Rect(self.board[self.numOfCells-1][j]).midbottom
             pygame.draw.line(self.background, self.linesColor, start, stop, 1)
+
+    def draw_thrones(self):
+        resolution = (60, 60)
+        blueThrone = self.load_image("blue-throne.jpg", -1)
+        redThrone = self.load_image("red-throne.jpg", -1)
+        blueThrone = pygame.transform.scale(blueThrone, resolution)
+        redThrone = pygame.transform.scale(redThrone, resolution)
+        self.center_blit(self.background, blueThrone, Rect(self.board[3][9]))
+        self.center_blit(self.background, redThrone, Rect(self.board[15][9]))
+
+    def draw_walls(self):
+        pass
 
     def app_loop(self):
         while 1:
@@ -153,11 +165,10 @@ class App(FunContainer):
                     pos = pygame.mouse.get_pos()
                     onboard = self.position2board(pos)
                     print(onboard)
-                    print(type(self.board[onboard[0]][onboard[1]]))
+                    print(self.board[onboard[0]][onboard[1]])
                     for s in self.abc.sprites():
                         if s.rect.collidepoint(pos):
                             print("yo")
-
 
             self.abc.update()
             self.abc.clear(self.screen, self.background)
