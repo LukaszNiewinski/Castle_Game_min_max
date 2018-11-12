@@ -63,16 +63,14 @@ class WhiteBall(pygame.sprite.Sprite):
         self.imageBase = pygame.transform.scale(self.image, (self.resolution[0], self.resolution[1]))
         self.image = self.imageBase
         self.rect = self.image.get_rect()
-        self.rect.move_ip(100, 100)
 
         self.clicked = False
 
+    def set_position(self, rect: Rect):
+        self.rect.center = rect.center
+
     def update(self):
-        pos = pygame.mouse.get_pos()
-        if self.rect.collidepoint(pos):
-            self.image = self.imageOnFocus
-        else:
-            self.image = self.imageBase
+        pass
 
     def click(self):
         self.clicked = True
@@ -119,10 +117,14 @@ class App(FunContainer):
         self.draw_walls()
         self.screen.blit(self.background, (0, 0))
         pygame.display.update()
+
         self.clock = pygame.time.Clock()
-        self.whiteBall = WhiteBall()
-        self.blackBall = BlackBall()
-        self.abc = pygame.sprite.RenderPlain((self.whiteBall, self.blackBall))
+
+        self.blackBalls = pygame.sprite.RenderPlain()
+        self.blackBalls_init()
+        self.whiteBalls = pygame.sprite.RenderPlain()
+        self.whiteBalls_init()
+
         self.app_loop()
 
     def board_init(self):
@@ -204,6 +206,21 @@ class App(FunContainer):
                 if self.wallMap[i][j]:
                     self.center_blit(self.background, wallImage, Rect(self.board[(i, j)]))
 
+    def blackBalls_init(self):
+        blackBallPositions = [(11, 2), (11, 16), (18, 5), (18, 13), (13, 7), (13, 11), (17, 7), (17, 11)]
+        for position in blackBallPositions:
+            ball = BlackBall()
+            ball.set_position(Rect(self.board[position]))
+            self.blackBalls.add(ball)
+
+    def whiteBalls_init(self):
+        blackBallPositions = [(7, 2), (7, 16), (0, 5), (0, 13), (5, 7), (5, 11), (1, 7), (1, 11)]
+        for position in blackBallPositions:
+            ball = WhiteBall()
+            ball.set_position(Rect(self.board[position]))
+            self.whiteBalls.add(ball)
+
+
     def app_loop(self):
         while 1:
             self.clock.tick(60)
@@ -217,14 +234,15 @@ class App(FunContainer):
                     onboard = self.position2board(pos)
                     print(onboard)
                     print(self.board[onboard[0]][onboard[1]])
-                    for s in self.abc.sprites():
-                        if s.rect.collidepoint(pos):
-                            print("yo")
 
-            # self.abc.update()
-            # self.abc.clear(self.screen, self.background)
-            # self.abc.draw(self.screen)
-            # pygame.display.update()
+            self.blackBalls.update()
+            self.blackBalls.clear(self.screen, self.background)
+            self.blackBalls.draw(self.screen)
+
+            self.whiteBalls.update()
+            self.whiteBalls.clear(self.screen, self.background)
+            self.whiteBalls.draw(self.screen)
+            pygame.display.update()
 
 
 if __name__ == "__main__":
