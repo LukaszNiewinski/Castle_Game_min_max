@@ -111,7 +111,7 @@ class App(FunContainer):
         self.background = pygame.transform.scale(self.background, (self.windowWidth, self.windowHeight))
         self.draw_lines()
         self.draw_thrones()
-        self.wallCoordinates = self.wall_coordinates_init()
+        self.wallMap = self.wall_map_init()
         self.draw_walls()
         self.screen.blit(self.background, (0, 0))
         pygame.display.update()
@@ -122,7 +122,7 @@ class App(FunContainer):
         self.app_loop()
 
     def board_init(self):
-        board = np.array([[Rect([0]*4)]*19]*19)
+        board = np.array([[Rect([0]*4)]*self.numOfCells]*self.numOfCells)
         for i in range(self.numOfCells):
             for j in range(self.numOfCells):
                 board[j][i] = Rect(i*self.cellWidth, j*self.cellWidth, self.cellWidth-1, self.cellHeight-1)
@@ -135,12 +135,12 @@ class App(FunContainer):
 
     def draw_lines(self):
         for i in range(self.numOfCells):
-            start = Rect(self.board[i][0]).midleft
-            stop = Rect(self.board[i][self.numOfCells-1]).midright
+            start = Rect(self.board[i][0]).center
+            stop = Rect(self.board[i][self.numOfCells-1]).center
             pygame.draw.line(self.background, self.linesColor, start, stop, 1)
         for j in range(self.numOfCells):
-            start = Rect(self.board[0][j]).midtop
-            stop = Rect(self.board[self.numOfCells-1][j]).midbottom
+            start = Rect(self.board[0][j]).center
+            stop = Rect(self.board[self.numOfCells-1][j]).center
             pygame.draw.line(self.background, self.linesColor, start, stop, 1)
 
     def draw_thrones(self):
@@ -152,23 +152,45 @@ class App(FunContainer):
         self.center_blit(self.background, blueThrone, Rect(self.board[3][9]))
         self.center_blit(self.background, redThrone, Rect(self.board[15][9]))
 
-    def wall_coordinates_init(self):
-        wallCoordinates = []
+    def wall_map_init(self):
+        wallMap = np.array([[False]*self.numOfCells]*19)
         for i in range(1, 8):
-            wallCoordinates.extend([(i, 2), (i, 16), (self.numOfCells-i-1, 2), (self.numOfCells-i-1, 16)])
+            wallMap[(i, 2)] = True
+            wallMap[(i, 16)] = True
+            wallMap[(self.numOfCells-i-1, 2)] = True
+            wallMap[(self.numOfCells-i-1, 16)] = True
         for i in range(0, 6):
-            wallCoordinates.extend([(i, 5), (i, 13), (self.numOfCells-i-1, 5), (self.numOfCells-i-1, 13)])
+            wallMap[(i, 5)] = True
+            wallMap[(i, 13)] = True
+            wallMap[(self.numOfCells-i-1, 5)] = True
+            wallMap[(self.numOfCells-i-1, 13)] = True
         for i in range(1, 6):
-            wallCoordinates.extend([(i, 7), (i, 11), (self.numOfCells-i-1, 7), (self.numOfCells-i-1, 11)])
-
-        return wallCoordinates
+            wallMap[(i, 7)] = True
+            wallMap[(i, 11)] = True
+            wallMap[(self.numOfCells-i-1, 7)] = True
+            wallMap[(self.numOfCells-i-1, 11)] = True
+        for i in range(3, 9):
+            wallMap[(7, i)] = True
+            wallMap[(11, i)] = True
+            wallMap[(7, self.numOfCells-i-1)] = True
+            wallMap[(11, self.numOfCells-i-1)] = True
+        for i in range(7, 12):
+            wallMap[(5, i)] = True
+            wallMap[(13, i)] = True
+        wallMap[(1, 8)] = True
+        wallMap[(1, 10)] = True
+        wallMap[(17, 8)] = True
+        wallMap[(17, 10)] = True
+        return wallMap
 
     def draw_walls(self):
         resolution = (40, 40)
         wallImage = self.load_image("wall.jpg")
         wallImage = pygame.transform.scale(wallImage, resolution)
-        for coordinate in self.wallCoordinates:
-            self.center_blit(self.background, wallImage, Rect(self.board[coordinate]))
+        for i in range(self.numOfCells):
+            for j in range(self.numOfCells):
+                if self.wallMap[i][j]:
+                    self.center_blit(self.background, wallImage, Rect(self.board[(i, j)]))
 
 
     def app_loop(self):
@@ -188,10 +210,10 @@ class App(FunContainer):
                         if s.rect.collidepoint(pos):
                             print("yo")
 
-            self.abc.update()
-            self.abc.clear(self.screen, self.background)
-            self.abc.draw(self.screen)
-            pygame.display.update()
+            # self.abc.update()
+            # self.abc.clear(self.screen, self.background)
+            # self.abc.draw(self.screen)
+            # pygame.display.update()
 
 
 if __name__ == "__main__":
