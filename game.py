@@ -239,6 +239,7 @@ class App(FunContainer):
 
     def app_loop(self):
         spriteClicked = None
+        playerMoving = Player.WHITE
         while 1:
             self.clock.tick(10)
             for event in pygame.event.get():
@@ -249,12 +250,19 @@ class App(FunContainer):
                 elif event.type == MOUSEBUTTONDOWN:
                     pos = pygame.mouse.get_pos()
                     if not spriteClicked:
-                        spriteClicked = self.blackBalls.clicked_sprite(pos)
+                        if playerMoving == Player.WHITE:
+                            spriteClicked = self.whiteBalls.clicked_sprite(pos)
+                        else:
+                            spriteClicked = self.blackBalls.clicked_sprite(pos)
                         break
                     if spriteClicked:
                         pos = self.position2board(pos)
                         spriteClicked.set_position(Rect(self.board[pos]))
                         spriteClicked = None
+                        if playerMoving == Player.WHITE:
+                            playerMoving = Player.BLACK
+                        else:
+                            playerMoving = Player.WHITE
 
             self.blackBalls.update()
             self.blackBalls.clear(self.screen, self.background)
