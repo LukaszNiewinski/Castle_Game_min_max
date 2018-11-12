@@ -2,6 +2,7 @@ import pygame
 from pygame.locals import *
 import sys, os
 import numpy as np
+from enum import Enum
 
 if not pygame.font:
     print("Warning, fonts disabled")
@@ -90,6 +91,27 @@ class BlackBall(WhiteBall):
         self.rect.move_ip(200, 100)
 
 
+class BallsContainer(pygame.sprite.RenderPlain):
+    def __init__(self):
+        super().__init__()
+    
+    def clicked_sprite(self, position):
+        for sprite in self.sprites():
+            if sprite.rect.collidepoint(position):
+                return sprite
+        return None
+
+
+class Player(Enum):
+    WHITE = 0
+    BLACK = 1
+
+
+class Round:
+    def __init__(self, whiteBalls: BallsContainer, blackBalls: BallsContainer):
+        self.whoMoving = Player.BLACK
+       
+
 class App(FunContainer):
     windowWidth = 800
     windowHeight = 800
@@ -120,11 +142,12 @@ class App(FunContainer):
 
         self.clock = pygame.time.Clock()
 
-        self.blackBalls = pygame.sprite.RenderPlain()
+        self.blackBalls = BallsContainer()
         self.blackBalls_init()
-        self.whiteBalls = pygame.sprite.RenderPlain()
+        self.whiteBalls = BallsContainer()
         self.whiteBalls_init()
 
+        
         self.app_loop()
 
     def board_init(self):
@@ -231,10 +254,11 @@ class App(FunContainer):
                     return
                 elif event.type == MOUSEBUTTONDOWN:
                     pos = pygame.mouse.get_pos()
-                    onboard = self.position2board(pos)
-                    print(onboard)
-                    print(self.board[onboard[0]][onboard[1]])
-
+                    sprite = self.blackBalls.clicked_sprite(pos)
+                    if sprite:
+                        print(self.position2board(sprite.rect.center))
+                    
+                    
             self.blackBalls.update()
             self.blackBalls.clear(self.screen, self.background)
             self.blackBalls.draw(self.screen)
