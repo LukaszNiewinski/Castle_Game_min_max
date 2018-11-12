@@ -73,12 +73,6 @@ class WhiteBall(pygame.sprite.Sprite):
     def update(self):
         pass
 
-    def click(self):
-        self.clicked = True
-
-    def unclick(self):
-        self.clicked = False
-
 
 class BlackBall(WhiteBall):
     def __init__(self):
@@ -243,10 +237,10 @@ class App(FunContainer):
             ball.set_position(Rect(self.board[position]))
             self.whiteBalls.add(ball)
 
-
     def app_loop(self):
+        spriteClicked = None
         while 1:
-            self.clock.tick(60)
+            self.clock.tick(10)
             for event in pygame.event.get():
                 if event.type == QUIT:
                     return
@@ -254,11 +248,14 @@ class App(FunContainer):
                     return
                 elif event.type == MOUSEBUTTONDOWN:
                     pos = pygame.mouse.get_pos()
-                    sprite = self.blackBalls.clicked_sprite(pos)
-                    if sprite:
-                        print(self.position2board(sprite.rect.center))
-                    
-                    
+                    if not spriteClicked:
+                        spriteClicked = self.blackBalls.clicked_sprite(pos)
+                        break
+                    if spriteClicked:
+                        pos = self.position2board(pos)
+                        spriteClicked.set_position(Rect(self.board[pos]))
+                        spriteClicked = None
+
             self.blackBalls.update()
             self.blackBalls.clear(self.screen, self.background)
             self.blackBalls.draw(self.screen)
