@@ -111,6 +111,8 @@ class App(FunContainer):
         self.background = pygame.transform.scale(self.background, (self.windowWidth, self.windowHeight))
         self.draw_lines()
         self.draw_thrones()
+        self.wallCoordinates = self.wall_coordinates_init()
+        self.draw_walls()
         self.screen.blit(self.background, (0, 0))
         pygame.display.update()
         self.clock = pygame.time.Clock()
@@ -153,14 +155,21 @@ class App(FunContainer):
     def wall_coordinates_init(self):
         wallCoordinates = []
         for i in range(1, 8):
-            wallCoordinates.append((i, 2))
-            wallCoordinates.append((i, 16))
-        for i in range (11, 18):
-            wallCoordinates.append((i, 2))
-            wallCoordinates.append((i, 16))
+            wallCoordinates.extend([(i, 2), (i, 16), (self.numOfCells-i-1, 2), (self.numOfCells-i-1, 16)])
+        for i in range(0, 6):
+            wallCoordinates.extend([(i, 5), (i, 13), (self.numOfCells-i-1, 5), (self.numOfCells-i-1, 13)])
+        for i in range(1, 6):
+            wallCoordinates.extend([(i, 7), (i, 11), (self.numOfCells-i-1, 7), (self.numOfCells-i-1, 11)])
+
+        return wallCoordinates
 
     def draw_walls(self):
-        pass
+        resolution = (40, 40)
+        wallImage = self.load_image("wall.jpg")
+        wallImage = pygame.transform.scale(wallImage, resolution)
+        for coordinate in self.wallCoordinates:
+            self.center_blit(self.background, wallImage, Rect(self.board[coordinate]))
+
 
     def app_loop(self):
         while 1:
