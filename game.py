@@ -95,9 +95,13 @@ class BlackBall(WhiteBall):
 class App(FunContainer):
     windowWidth = 800
     windowHeight = 800
+    marginWidth = 10
+    marginHeight = 10
     numOfCells = 19
-    cellWidth = np.floor_divide(windowWidth, numOfCells)
-    cellHeight = np.floor_divide(windowHeight, numOfCells)
+    cellWidth = np.floor_divide(windowWidth-2*marginWidth, numOfCells)
+    marginWidth += np.floor_divide(np.remainder(windowWidth-2*marginWidth, numOfCells), 2)
+    cellHeight = np.floor_divide(windowHeight-2*marginHeight, numOfCells)
+    marginHeight += np.floor_divide(np.remainder(windowHeight-2*marginHeight, numOfCells), 2)
     linesColor = Color(25, 25, 110)
     windowName = "Castle game"
 
@@ -125,12 +129,20 @@ class App(FunContainer):
         board = np.array([[Rect([0]*4)]*self.numOfCells]*self.numOfCells)
         for i in range(self.numOfCells):
             for j in range(self.numOfCells):
-                board[j][i] = Rect(i*self.cellWidth, j*self.cellWidth, self.cellWidth-1, self.cellHeight-1)
+                board[j][i] = Rect(i*self.cellWidth+self.marginWidth, j*self.cellHeight+self.marginHeight, self.cellWidth-1, self.cellHeight-1)
         return board
 
     def position2board(self, pos):
-        x = np.floor_divide(pos[1], self.cellWidth)
-        y = np.floor_divide(pos[0], self.cellHeight)
+        x = np.floor_divide(pos[1] - self.marginWidth, self.cellWidth)
+        if x >= self.numOfCells:
+            x = self.numOfCells - 1
+        elif x <= 0:
+            x = 0
+        y = np.floor_divide(pos[0] - self.marginHeight, self.cellHeight)
+        if y >= self.numOfCells:
+            y = self.numOfCells - 1
+        elif y <= 0:
+            y = 0
         return x, y
 
     def draw_lines(self):
@@ -191,7 +203,6 @@ class App(FunContainer):
             for j in range(self.numOfCells):
                 if self.wallMap[i][j]:
                     self.center_blit(self.background, wallImage, Rect(self.board[(i, j)]))
-
 
     def app_loop(self):
         while 1:
