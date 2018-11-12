@@ -54,35 +54,62 @@ class FunContainer:
         destination.blit(image, imageRect)
 
 
-class WhiteBall(pygame.sprite.Sprite):
+class Ball(pygame.sprite.Sprite):
     resolution = (35, 35)
 
     def __init__(self):
         super().__init__()
-        self.image = FunContainer.load_image("white-ball.jpg", -1)
-        self.imageOnFocus = pygame.transform.scale(self.image, (self.resolution[0]+5, self.resolution[1]+5))
+        self.image = None
+        self.imageBase = None
+        self.imageOnFocus = None
+        self.rect = None
+        self.rectBase = None
+        self.rectOnFocus = None
+        self.boardPos = None
+        self.color = None
+
+    def on_init(self):
+        self.imageOnFocus = pygame.transform.scale(self.image, (self.resolution[0] + 5, self.resolution[1] + 5))
         self.imageBase = pygame.transform.scale(self.image, (self.resolution[0], self.resolution[1]))
         self.image = self.imageBase
-        self.rect = self.image.get_rect()
+        self.rectOnFocus = self.imageOnFocus.get_rect()
+        self.rectBase = self.imageBase.get_rect()
+        self.rect = self.rectBase
 
-        self.clicked = False
-
-    def set_position(self, rect: Rect):
+    def set_position(self, rect: Rect, position):
         self.rect.center = rect.center
+        self.boardPos = position
+
+    def clicked(self):
+        self.image = self.imageOnFocus
+        center = self.rect.center
+        self.rect = self.rectOnFocus
+        self.rect.center = center
+
+    def unclicked(self):
+        self.image = self.imageBase
+        center = self.rect.center
+        self.rect = self.rectBase
+        self.rect.center = center
 
     def update(self):
         pass
 
 
-class BlackBall(WhiteBall):
+class WhiteBall(Ball):
     def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
+        super().__init__()
+        self.image = FunContainer.load_image("white-ball.jpg", -1)
+        self.color = GameColor.WHITE
+        self.on_init()
+
+
+class BlackBall(Ball):
+    def __init__(self):
+        super().__init__()
         self.image = FunContainer.load_image("black-ball.jpg", -1)
-        self.imageOnFocus = pygame.transform.scale(self.image, (self.resolution[0]+5, self.resolution[1]+5))
-        self.imageBase = pygame.transform.scale(self.image, (self.resolution[0], self.resolution[1]))
-        self.image = self.imageBase
-        self.rect = self.image.get_rect()
-        self.rect.move_ip(200, 100)
+        self.color = GameColor.BLACK
+        self.on_init()
 
 
 class BallsContainer(pygame.sprite.RenderPlain):
@@ -96,15 +123,10 @@ class BallsContainer(pygame.sprite.RenderPlain):
         return None
 
 
-class Player(Enum):
+class GameColor(Enum):
     WHITE = 0
     BLACK = 1
 
-
-class Round:
-    def __init__(self, whiteBalls: BallsContainer, blackBalls: BallsContainer):
-        self.whoMoving = Player.BLACK
-       
 
 class GameModel(FunContainer):
     windowWidth = 800
@@ -129,17 +151,23 @@ class GameModel(FunContainer):
         self.background = pygame.transform.scale(self.background, (self.windowWidth, self.windowHeight))
         self.draw_lines()
         self.draw_thrones()
-        self.wallMap = self.wall_map_init()
+        self.wallsMap = self.wall_map_init()
         self.draw_walls()
         self.screen.blit(self.background, (0, 0))
-        pygame.display.update()
 
         self.clock = pygame.time.Clock()
 
+        self.ballsMap = np.array([[None]*19]*19, dtype=GameColor)
         self.blackBalls = BallsContainer()
-        self.blackBalls_init()
         self.whiteBalls = BallsContainer()
-        self.whiteBalls_init()
+        self.balls_init()
+
+        self.blackBalls.draw(self.screen)
+        self.whiteBalls.draw(self.screen)
+        pygame.display.update()
+
+        self.playerMoving = GameColor.WHITE
+        self.ballsMoving = self.whiteBalls
 
     def board_init(self):
         board = np.array([[Rect([0]*4)]*self.numOfCells]*self.numOfCells)
@@ -148,7 +176,7 @@ class GameModel(FunContainer):
                 board[j][i] = Rect(i*self.cellWidth+self.marginWidth, j*self.cellHeight+self.marginHeight, self.cellWidth-1, self.cellHeight-1)
         return board
 
-    def position2board(self, pos):
+    def cartesian2board(self, pos):
         x = np.floor_divide(pos[1] - self.marginWidth, self.cellWidth)
         if x >= self.numOfCells:
             x = self.numOfCells - 1
@@ -181,35 +209,36 @@ class GameModel(FunContainer):
         self.center_blit(self.background, redThrone, Rect(self.board[15][9]))
 
     def wall_map_init(self):
-        wallMap = np.array([[False]*self.numOfCells]*19)
+        wallsMap = np.array([[False]*self.numOfCells]*19, dtype=bool)
         for i in range(1, 8):
-            wallMap[(i, 2)] = True
-            wallMap[(i, 16)] = True
-            wallMap[(self.numOfCells-i-1, 2)] = True
-            wallMap[(self.numOfCells-i-1, 16)] = True
+            wallsMap[(i, 2)] = True
+            wallsMap[(i, 16)] = True
+            wallsMap[(self.numOfCells-i-1, 2)] = True
+            wallsMap[(self.numOfCells-i-1, 16)] = True
         for i in range(0, 6):
-            wallMap[(i, 5)] = True
-            wallMap[(i, 13)] = True
-            wallMap[(self.numOfCells-i-1, 5)] = True
-            wallMap[(self.numOfCells-i-1, 13)] = True
+            wallsMap[(i, 5)] = True
+            wallsMap[(i, 13)] = True
+            wallsMap[(self.numOfCells-i-1, 5)] = True
+            wallsMap[(self.numOfCells-i-1, 13)] = True
         for i in range(1, 6):
-            wallMap[(i, 7)] = True
-            wallMap[(i, 11)] = True
-            wallMap[(self.numOfCells-i-1, 7)] = True
-            wallMap[(self.numOfCells-i-1, 11)] = True
+            wallsMap[(i, 7)] = True
+            wallsMap[(i, 11)] = True
+            wallsMap[(self.numOfCells-i-1, 7)] = True
+            wallsMap[(self.numOfCells-i-1, 11)] = True
         for i in range(3, 9):
-            wallMap[(7, i)] = True
-            wallMap[(11, i)] = True
-            wallMap[(7, self.numOfCells-i-1)] = True
-            wallMap[(11, self.numOfCells-i-1)] = True
+            wallsMap[(7, i)] = True
+            wallsMap[(11, i)] = True
+            wallsMap[(7, self.numOfCells-i-1)] = True
+            wallsMap[(11, self.numOfCells-i-1)] = True
         for i in range(7, 12):
-            wallMap[(5, i)] = True
-            wallMap[(13, i)] = True
-        wallMap[(1, 8)] = True
-        wallMap[(1, 10)] = True
-        wallMap[(17, 8)] = True
-        wallMap[(17, 10)] = True
-        return wallMap
+            wallsMap[(5, i)] = True
+            wallsMap[(13, i)] = True
+        wallsMap[(1, 8)] = True
+        wallsMap[(1, 10)] = True
+        wallsMap[(17, 8)] = True
+        wallsMap[(17, 10)] = True
+        return wallsMap
+
 
     def draw_walls(self):
         resolution = (40, 40)
@@ -217,22 +246,52 @@ class GameModel(FunContainer):
         wallImage = pygame.transform.scale(wallImage, resolution)
         for i in range(self.numOfCells):
             for j in range(self.numOfCells):
-                if self.wallMap[i][j]:
+                if self.wallsMap[i][j]:
                     self.center_blit(self.background, wallImage, Rect(self.board[(i, j)]))
 
-    def blackBalls_init(self):
+    def balls_init(self):
         blackBallPositions = [(11, 2), (11, 16), (18, 5), (18, 13), (13, 7), (13, 11), (17, 7), (17, 11)]
+        whiteBallPositions = [(7, 2), (7, 16), (0, 5), (0, 13), (5, 7), (5, 11), (1, 7), (1, 11)]
+
         for position in blackBallPositions:
             ball = BlackBall()
-            ball.set_position(Rect(self.board[position]))
+            self.place_ball(ball, position)
             self.blackBalls.add(ball)
 
-    def whiteBalls_init(self):
-        blackBallPositions = [(7, 2), (7, 16), (0, 5), (0, 13), (5, 7), (5, 11), (1, 7), (1, 11)]
-        for position in blackBallPositions:
+        for position in whiteBallPositions:
             ball = WhiteBall()
-            ball.set_position(Rect(self.board[position]))
+            self.place_ball(ball, position)
             self.whiteBalls.add(ball)
+
+    def change_player(self):
+        if self.playerMoving == GameColor.WHITE:
+            self.playerMoving = GameColor.BLACK
+            self.ballsMoving = self.blackBalls
+        else:
+            self.playerMoving = GameColor.WHITE
+            self.ballsMoving = self.whiteBalls
+    
+    def place_ball(self, ball: Ball, boardPos: tuple):
+        self.ballsMap[boardPos] = ball.color
+        ball.set_position(Rect(self.board[boardPos]), boardPos)
+
+    def valid_move(self, startPos: tuple, endPos: tuple):
+        if startPos[0]-endPos[0] == 0:
+            if startPos[1]-endPos[1]:
+                return True
+            else:
+                return False
+        elif startPos[1]-endPos[1] == 0:
+            return True
+        return False
+
+    def move_ball(self, ball: Ball, endPos: tuple) -> bool:
+        startPos = ball.boardPos
+        if not self.valid_move(startPos, endPos):
+            return False
+        else:
+            self.ballsMap[(startPos)] = None
+            Ball.set_position(Rect(self.board[endPos]), endPos)
 
     def view_update(self):
         self.blackBalls.update()

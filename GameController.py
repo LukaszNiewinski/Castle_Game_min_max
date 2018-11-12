@@ -4,17 +4,6 @@ from GameModel import *
 class GameController:
     def __init__(self, game: GameModel):
         self.game = GameModel()
-        self.playerMoving = Player.WHITE
-        self.ballsMoving = game.whiteBalls
-        self.main()
-
-    def change_player(self):
-        if self.playerMoving == Player.WHITE:
-            self.playerMoving = Player.BLACK
-            self.ballsMoving = self.game.blackBalls
-        else:
-            self.playerMoving = Player.WHITE
-            self.ballsMoving = self.game.whiteBalls
 
     def main(self):
         spriteClicked = None
@@ -28,10 +17,17 @@ class GameController:
                 elif event.type == MOUSEBUTTONDOWN:
                     pos = pygame.mouse.get_pos()
                     if not spriteClicked:
-                        spriteClicked = self.ballsMoving.clicked_sprite(pos)
+                        spriteClicked = self.game.ballsMoving.clicked_sprite(pos)
+                        if spriteClicked:
+                            spriteClicked.clicked()
                     else:
-                        pos = self.game.position2board(pos)
-                        spriteClicked.set_position(Rect(self.game.board[pos]))
-                        spriteClicked = None
-                        self.change_player()
+                        pos = self.game.cartesian2board(pos)
+                        if self.game.valid_move(spriteClicked.boardPos, pos):
+                            spriteClicked.set_position(Rect(self.game.board[pos]), pos)
+                            spriteClicked.unclicked()
+                            spriteClicked = None
+                            self.game.change_player()
+                        else:
+                            spriteClicked.unclicked()
+                            spriteClicked = None
             self.game.view_update()
