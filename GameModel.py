@@ -1,6 +1,6 @@
 import pygame
 from pygame.locals import *
-import sys, os
+import os
 import numpy as np
 from enum import Enum
 
@@ -106,7 +106,7 @@ class Round:
         self.whoMoving = Player.BLACK
        
 
-class App(FunContainer):
+class GameModel(FunContainer):
     windowWidth = 800
     windowHeight = 800
     marginWidth = 10
@@ -140,9 +140,6 @@ class App(FunContainer):
         self.blackBalls_init()
         self.whiteBalls = BallsContainer()
         self.whiteBalls_init()
-
-        
-        self.app_loop()
 
     def board_init(self):
         board = np.array([[Rect([0]*4)]*self.numOfCells]*self.numOfCells)
@@ -237,43 +234,13 @@ class App(FunContainer):
             ball.set_position(Rect(self.board[position]))
             self.whiteBalls.add(ball)
 
-    def app_loop(self):
-        spriteClicked = None
-        playerMoving = Player.WHITE
-        while 1:
-            self.clock.tick(10)
-            for event in pygame.event.get():
-                if event.type == QUIT:
-                    return
-                elif event.type == KEYDOWN and event.key == K_ESCAPE:
-                    return
-                elif event.type == MOUSEBUTTONDOWN:
-                    pos = pygame.mouse.get_pos()
-                    if not spriteClicked:
-                        if playerMoving == Player.WHITE:
-                            spriteClicked = self.whiteBalls.clicked_sprite(pos)
-                        else:
-                            spriteClicked = self.blackBalls.clicked_sprite(pos)
-                        break
-                    if spriteClicked:
-                        pos = self.position2board(pos)
-                        spriteClicked.set_position(Rect(self.board[pos]))
-                        spriteClicked = None
-                        if playerMoving == Player.WHITE:
-                            playerMoving = Player.BLACK
-                        else:
-                            playerMoving = Player.WHITE
+    def view_update(self):
+        self.blackBalls.update()
+        self.blackBalls.clear(self.screen, self.background)
+        self.blackBalls.draw(self.screen)
 
-            self.blackBalls.update()
-            self.blackBalls.clear(self.screen, self.background)
-            self.blackBalls.draw(self.screen)
-
-            self.whiteBalls.update()
-            self.whiteBalls.clear(self.screen, self.background)
-            self.whiteBalls.draw(self.screen)
-            pygame.display.update()
-
-
-if __name__ == "__main__":
-    App()
+        self.whiteBalls.update()
+        self.whiteBalls.clear(self.screen, self.background)
+        self.whiteBalls.draw(self.screen)
+        pygame.display.update()
 
