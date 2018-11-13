@@ -127,6 +127,13 @@ class GameColor(Enum):
     WHITE = 0
     BLACK = 1
 
+    @classmethod
+    def second_color(cls, color):
+        if color == cls.WHITE:
+            return cls.BLACK
+        elif color == cls.BLACK:
+            return cls.WHITE
+
 
 class GameModel(FunContainer):
     windowWidth = 800
@@ -291,6 +298,16 @@ class GameModel(FunContainer):
                     return True
         return None
 
+    def beat(self, boardPos: tuple, ballColor: GameColor):
+        ballsContainer = None
+        if ballColor == GameColor.WHITE:
+            ballsContainer = self.whiteBalls
+        else:
+            ballsContainer = self.blackBalls
+        sprite = ballsContainer.clicked_sprite(Rect(self.board[boardPos]).center)
+        sprite.kill()
+
+
     def valid_move(self, ballColor: GameColor, startPos: tuple, endPos: tuple):
         dy = endPos[0] - startPos[0]
         dx = endPos[1] - startPos[1]
@@ -314,6 +331,10 @@ class GameModel(FunContainer):
                 return False
         if self.is_something_between(self.ballsMap, startPos, endPos, direction, delta):
             return False
+        if self.ballsMap[endPos]:
+            if self.ballsMap[endPos] == ballColor:
+                return False
+            self.beat(endPos, GameColor.second_color(ballColor))
         return True
 
 
