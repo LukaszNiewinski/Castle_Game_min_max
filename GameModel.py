@@ -123,6 +123,19 @@ class BallsContainer(pygame.sprite.RenderPlain):
         return None
 
 
+class Fire(pygame.sprite.Sprite):
+    resolution = (50, 50)
+
+    def __init__(self):
+        super().__init__()
+        self.image = FunContainer.load_image("fire.jpg", -1)
+        self.image = pygame.transform.scale(self.image, self.resolution)
+        self.rect = self.image.get_rect()
+
+    def set_rect(self, rect):
+        self.rect.center = rect.center
+
+
 class GameColor(Enum):
     WHITE = 0
     BLACK = 1
@@ -175,6 +188,8 @@ class GameModel(FunContainer):
 
         self.playerMoving = GameColor.WHITE
         self.ballsMoving = self.whiteBalls
+
+        self.fire = Fire()
 
     def board_init(self):
         board = np.array([[Rect([0]*4)]*self.numOfCells]*self.numOfCells)
@@ -304,9 +319,14 @@ class GameModel(FunContainer):
             ballsContainer = self.whiteBalls
         else:
             ballsContainer = self.blackBalls
-        sprite = ballsContainer.clicked_sprite(Rect(self.board[boardPos]).center)
+        rect = Rect(self.board[boardPos])
+        sprite = ballsContainer.clicked_sprite(rect.center)
         sprite.kill()
-
+        self.fire.set_rect(rect)
+        self.center_blit(self.screen, self.fire.image, self.fire.rect)
+        pygame.display.update()
+        pygame.time.delay(500)
+        self.screen.blit(self.background, self.fire.rect, self.fire.rect)
 
     def valid_move(self, ballColor: GameColor, startPos: tuple, endPos: tuple):
         dy = endPos[0] - startPos[0]
