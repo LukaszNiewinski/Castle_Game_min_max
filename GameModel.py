@@ -276,14 +276,22 @@ class GameModel(FunContainer):
         ball.set_position(Rect(self.board[boardPos]), boardPos)
 
     def valid_move(self, ballColor: GameColor, startPos: tuple, endPos: tuple):
-        if startPos[0]-endPos[0] == 0:
-            if startPos[1]-endPos[1]:
-                return True
-            else:
+        dy = endPos[0] - startPos[0]
+        dx = endPos[1] - startPos[1]
+        delta = dy
+        direction = 0
+        if (dx or not dy) and (not dx or dy):
+            return False
+        if not dy:
+            delta = dx
+            direction = 1
+        isStartWall = self.wallsMap[startPos]
+        isEndWall = self.wallsMap[endPos]
+        if (isStartWall and not isEndWall) or (not isStartWall and isEndWall):
+            if abs(delta) > 1:
                 return False
-        elif startPos[1]-endPos[1] == 0:
-            return True
-        return False
+        return True
+
 
     def move_ball(self, ball: Ball, endPos: tuple) -> bool:
         startPos = ball.boardPos
