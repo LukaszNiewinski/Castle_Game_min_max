@@ -275,7 +275,7 @@ class GameModel(FunContainer):
         self.ballsMap[boardPos] = ball.color
         ball.set_position(Rect(self.board[boardPos]), boardPos)
 
-    def is_something_between(self, map: np.ndarray, startPos: tuple, endPos: tuple, direction, delta, negated: bool):
+    def is_something_between(self, map: np.ndarray, startPos: tuple, endPos: tuple, direction, delta, negated=False):
         # negated paramter:
         # if false check if there is any wall between clear cells
         # if true check if there is any clear cell between walls
@@ -283,11 +283,11 @@ class GameModel(FunContainer):
             startPos, endPos = endPos, startPos
         if direction == 0:
             for cell in map[startPos[0]+1:endPos[0], startPos[1]]:
-                if np.logical_xor(cell, negated):
+                if np.logical_xor(bool(cell), negated):
                     return True
         elif direction == 1:
             for cell in map[startPos[0], startPos[1]+1:endPos[1]]:
-                if np.logical_xor(cell, negated):
+                if np.logical_xor(bool(cell), negated):
                     return True
         return None
 
@@ -307,11 +307,13 @@ class GameModel(FunContainer):
             if abs(delta) > 1:
                 return False
         elif not isStartWall and not isEndWall:
-            if self.is_something_between(self.wallsMap, startPos, endPos, direction, delta, False):
+            if self.is_something_between(self.wallsMap, startPos, endPos, direction, delta):
                 return False
         else:
             if self.is_something_between(self.wallsMap, startPos, endPos, direction, delta, True):
                 return False
+        if self.is_something_between(self.ballsMap, startPos, endPos, direction, delta):
+            return False
         return True
 
 
