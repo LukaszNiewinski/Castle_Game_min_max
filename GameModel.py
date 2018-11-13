@@ -275,7 +275,7 @@ class GameModel(FunContainer):
         self.ballsMap[boardPos] = ball.color
         ball.set_position(Rect(self.board[boardPos]), boardPos)
 
-    def valid_move(self, startPos: tuple, endPos: tuple):
+    def valid_move(self, ballColor: GameColor, startPos: tuple, endPos: tuple):
         if startPos[0]-endPos[0] == 0:
             if startPos[1]-endPos[1]:
                 return True
@@ -287,11 +287,12 @@ class GameModel(FunContainer):
 
     def move_ball(self, ball: Ball, endPos: tuple) -> bool:
         startPos = ball.boardPos
-        if not self.valid_move(startPos, endPos):
+        if not self.valid_move(ball.color, startPos, endPos):
             return False
         else:
-            self.ballsMap[(startPos)] = None
-            Ball.set_position(Rect(self.board[endPos]), endPos)
+            self.ballsMap[startPos] = None
+            self.place_ball(ball, endPos)
+            return True
 
     def view_update(self):
         self.blackBalls.update()

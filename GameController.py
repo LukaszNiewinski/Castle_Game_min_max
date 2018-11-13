@@ -22,12 +22,9 @@ class GameController:
                             spriteClicked.clicked()
                     else:
                         pos = self.game.cartesian2board(pos)
-                        if self.game.valid_move(spriteClicked.boardPos, pos):
-                            spriteClicked.set_position(Rect(self.game.board[pos]), pos)
-                            spriteClicked.unclicked()
-                            spriteClicked = None
+                        if self.game.move_ball(spriteClicked, pos):
                             self.game.change_player()
-                        else:
-                            spriteClicked.unclicked()
-                            spriteClicked = None
+                        spriteClicked.unclicked()
+                        spriteClicked = None
+
             self.game.view_update()
