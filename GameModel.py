@@ -136,6 +136,21 @@ class Fire(pygame.sprite.Sprite):
         self.rect.center = rect.center
 
 
+class Gauntlet(pygame.sprite.Sprite):
+    resolution = (50, 50)
+
+    def __init__(self):
+        super().__init__()
+        self.image = FunContainer.load_image("gauntlet.jpg", -1)
+        self.clickedImage = pygame.transform.scale(self.image, (self.resolution[0]-5, self.resolution[1]-5))
+        self.normalImage = pygame.transform.scale(self.image, self.resolution)
+        self.image = self.normalImage
+        self.rect = self.image.get_rect()
+
+    def update(self):
+        self.rect.midtop = pygame.mouse.get_pos()
+
+
 class GameColor(Enum):
     WHITE = 0
     BLACK = 1
@@ -190,6 +205,9 @@ class GameModel(FunContainer):
         self.ballsMoving = self.whiteBalls
 
         self.fire = Fire()
+        self.gauntlet = Gauntlet()
+
+        self.background2 = self.background.copy()
 
     def board_init(self):
         board = np.array([[Rect([0]*4)]*self.numOfCells]*self.numOfCells)
@@ -263,7 +281,7 @@ class GameModel(FunContainer):
 
 
     def draw_walls(self):
-        resolution = (40, 40)
+        resolution = (42, 42)
         wallImage = self.load_image("wall.jpg")
         wallImage = pygame.transform.scale(wallImage, resolution)
         for i in range(self.numOfCells):
@@ -368,6 +386,8 @@ class GameModel(FunContainer):
             return True
 
     def view_update(self):
+        self.screen.blit(self.background, self.gauntlet.rect, self.gauntlet.rect)
+
         self.blackBalls.update()
         self.blackBalls.clear(self.screen, self.background)
         self.blackBalls.draw(self.screen)
@@ -375,5 +395,9 @@ class GameModel(FunContainer):
         self.whiteBalls.update()
         self.whiteBalls.clear(self.screen, self.background)
         self.whiteBalls.draw(self.screen)
+
+        self.gauntlet.update()
+        self.screen.blit(self.gauntlet.image, self.gauntlet.rect)
+
         pygame.display.update()
 

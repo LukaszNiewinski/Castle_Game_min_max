@@ -8,7 +8,7 @@ class GameController:
     def main(self):
         spriteClicked = None
         while 1:
-            self.game.clock.tick(10)
+            self.game.clock.tick(30)
             for event in pygame.event.get():
                 if event.type == QUIT:
                     return
