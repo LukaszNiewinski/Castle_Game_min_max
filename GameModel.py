@@ -54,8 +54,21 @@ class FunContainer:
         destination.blit(image, imageRect)
 
 
+class GameColor(Enum):
+    WHITE = 0
+    BLACK = 1
+
+    @classmethod
+    def second_color(cls, color):
+        if color == cls.WHITE:
+            return cls.BLACK
+        elif color == cls.BLACK:
+            return cls.WHITE
+
+
 class Ball(pygame.sprite.Sprite):
     resolution = (35, 35)
+    color = None
 
     def __init__(self):
         super().__init__()
@@ -66,7 +79,6 @@ class Ball(pygame.sprite.Sprite):
         self.rectBase = None
         self.rectOnFocus = None
         self.boardPos = None
-        self.color = None
 
     def on_init(self):
         self.imageOnFocus = pygame.transform.scale(self.image, (self.resolution[0] + 5, self.resolution[1] + 5))
@@ -97,18 +109,20 @@ class Ball(pygame.sprite.Sprite):
 
 
 class WhiteBall(Ball):
+    color = GameColor.WHITE
+
     def __init__(self):
         super().__init__()
         self.image = FunContainer.load_image("white-ball.jpg", -1)
-        self.color = GameColor.WHITE
         self.on_init()
 
 
 class BlackBall(Ball):
+    color = GameColor.BLACK
+
     def __init__(self):
         super().__init__()
         self.image = FunContainer.load_image("black-ball.jpg", -1)
-        self.color = GameColor.BLACK
         self.on_init()
 
 
@@ -156,18 +170,6 @@ class Gauntlet(pygame.sprite.Sprite):
 
     def unclicked(self):
         self.image = self.normalImage
-
-
-class GameColor(Enum):
-    WHITE = 0
-    BLACK = 1
-
-    @classmethod
-    def second_color(cls, color):
-        if color == cls.WHITE:
-            return cls.BLACK
-        elif color == cls.BLACK:
-            return cls.WHITE
 
 
 class GameModel(FunContainer):
@@ -284,7 +286,6 @@ class GameModel(FunContainer):
         wallsMap[(17, 10)] = True
         return wallsMap
 
-
     def draw_walls(self):
         resolution = (42, 42)
         wallImage = self.load_image("wall.jpg")
@@ -379,7 +380,6 @@ class GameModel(FunContainer):
                 return False
             self.beat(endPos, GameColor.second_color(ballColor))
         return True
-
 
     def move_ball(self, ball: Ball, endPos: tuple) -> bool:
         startPos = ball.boardPos
