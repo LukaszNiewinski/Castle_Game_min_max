@@ -1,9 +1,9 @@
-from GameModel import *
+from GameView import *
 
 
 class GameController:
-    def __init__(self, game: GameModel):
-        self.game = GameModel()
+    def __init__(self, game: GameView):
+        self.game = GameView()
 
     def main(self):
         spriteClicked = None
