@@ -15,6 +15,7 @@ class GameController:
                 elif event.type == KEYDOWN and event.key == K_ESCAPE:
                     return
                 elif event.type == MOUSEBUTTONDOWN:
+                    self.game.gauntlet.clicked()
                     pos = pygame.mouse.get_pos()
                     if not spriteClicked:
                         spriteClicked = self.game.ballsMoving.clicked_sprite(pos)
@@ -26,5 +27,6 @@ class GameController:
                             self.game.change_player()
                         spriteClicked.unclicked()
                         spriteClicked = None
-
+                elif event.type == MOUSEBUTTONUP:
+                    self.game.gauntlet.unclicked()
             self.game.view_update()
