@@ -160,9 +160,10 @@ class Gauntlet(pygame.sprite.Sprite):
 
 
 class Player:
-    def __init__(self):
-        self.color = None
-        self.balls = None
+    def __init__(self, color, balls, winningThrone):
+        self.color = color
+        self.balls = balls
+        self.winningThrone = winningThrone
 
 
 class GameView(FunContainer):
@@ -207,9 +208,18 @@ class GameView(FunContainer):
         self.blackBalls.draw(self.screen)
         self.whiteBalls.draw(self.screen)
 
-        self.playerMoving = GameColor.WHITE
-        self.ballsMoving = self.whiteBalls
+        self.whitePlayer = Player(GameColor.WHITE, self.whiteBalls, self.gameModel.blackThronePos)
+        self.blackPlayer = Player(GameColor.BLACK, self.blackBalls, self.gameModel.blackThronePos)
+
+        self.activePlayer = self.player_init()
+
         pygame.display.update()
+
+    def player_init(self):
+        if self.gameModel.activeColor == GameColor.WHITE:
+            return self.whitePlayer
+        else:
+            return self.blackPlayer
 
     def board_init(self):
         board = np.array([[Rect([0]*4)]*self.numOfCells]*self.numOfCells)
@@ -274,12 +284,12 @@ class GameView(FunContainer):
                         self.blackBalls.add(ball)
 
     def change_player(self):
-        if self.gameModel.activeColor == GameColor.WHITE:
-            self.gameModel.activeColor = GameColor.BLACK
-            self.ballsMoving = self.blackBalls
-        else:
+        if self.activePlayer == self.blackPlayer:
+            self.activePlayer = self.whitePlayer
             self.gameModel.activeColor = GameColor.WHITE
-            self.ballsMoving = self.whiteBalls
+        else:
+            self.activePlayer = self.blackPlayer
+            self.gameModel.activeColor = GameColor.BLACK
     
     def place_ball(self, ball: Ball, boardPos: tuple):
         self.gameModel.ballsMap[boardPos] = ball.color
@@ -303,7 +313,7 @@ class GameView(FunContainer):
 
     def move_ball(self, ball: Ball, endPos: tuple) -> bool:
         startPos = ball.boardPos
-        if not self.gameModel.valid_move(ball.color, startPos, endPos):
+        if not self.gameModel.valid_move(startPos, endPos):
             return False
         else:
             if self.gameModel.ballsMap[endPos]:

@@ -81,9 +81,9 @@ class GameModel:
             for cell in map[startPos[0], startPos[1]+1:endPos[1]]:
                 if np.logical_xor(bool(cell), negated):
                     return True
-        return None
+        return False
 
-    def valid_move(self, ballColor: GameColor, startPos: tuple, endPos: tuple):
+    def valid_move(self, startPos: tuple, endPos: tuple):
         dy = endPos[0] - startPos[0]
         dx = endPos[1] - startPos[1]
         delta = dy

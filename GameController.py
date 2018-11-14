@@ -18,7 +18,7 @@ class GameController:
                     self.game.gauntlet.clicked()
                     pos = pygame.mouse.get_pos()
                     if not spriteClicked:
-                        spriteClicked = self.game.ballsMoving.clicked_sprite(pos)
+                        spriteClicked = self.game.activePlayer.balls.clicked_sprite(pos)
                         if spriteClicked:
                             spriteClicked.clicked()
                     else:
