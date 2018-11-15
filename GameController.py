@@ -1,5 +1,5 @@
 from GameView import *
-
+import sys
 
 class GameController:
     def __init__(self, game: GameView):
@@ -23,8 +23,12 @@ class GameController:
                             spriteClicked.clicked()
                     else:
                         pos = self.game.cartesian2board(pos)
-                        if self.game.move_ball(spriteClicked, pos):
-                            self.game.change_player()
+                        try:
+                            if self.game.move_ball(spriteClicked, pos):
+                                self.game.change_player()
+                        except(SystemExit):
+                            pygame.quit()
+                            sys.exit(0)
                         spriteClicked.unclicked()
                         spriteClicked = None
                 elif event.type == MOUSEBUTTONUP:

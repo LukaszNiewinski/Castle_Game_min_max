@@ -208,7 +208,7 @@ class GameView(FunContainer):
         self.blackBalls.draw(self.screen)
         self.whiteBalls.draw(self.screen)
 
-        self.whitePlayer = Player(GameColor.WHITE, self.whiteBalls, self.gameModel.blackThronePos)
+        self.whitePlayer = Player(GameColor.WHITE, self.whiteBalls, self.gameModel.whiteThronePos)
         self.blackPlayer = Player(GameColor.BLACK, self.blackBalls, self.gameModel.blackThronePos)
 
         self.activePlayer = self.player_init()
@@ -283,6 +283,22 @@ class GameView(FunContainer):
                         self.place_ball(ball, (i, j))
                         self.blackBalls.add(ball)
 
+    def view_update(self):
+        self.screen.blit(self.background, self.gauntlet.rect, self.gauntlet.rect)
+
+        self.blackBalls.update()
+        self.blackBalls.clear(self.screen, self.background)
+        self.blackBalls.draw(self.screen)
+
+        self.whiteBalls.update()
+        self.whiteBalls.clear(self.screen, self.background)
+        self.whiteBalls.draw(self.screen)
+
+        self.gauntlet.update()
+        self.screen.blit(self.gauntlet.image, self.gauntlet.rect)
+
+        pygame.display.update()
+
     def change_player(self):
         if self.activePlayer == self.blackPlayer:
             self.activePlayer = self.whitePlayer
@@ -294,7 +310,6 @@ class GameView(FunContainer):
     def place_ball(self, ball: Ball, boardPos: tuple):
         self.gameModel.ballsMap[boardPos] = ball.color
         ball.set_position(Rect(self.board[boardPos]), boardPos)
-
 
     def beat(self, boardPos: tuple, ballColor: GameColor):
         ballsContainer = None
@@ -320,21 +335,17 @@ class GameView(FunContainer):
                 self.beat(endPos, GameColor.second_color(ball.color))
             self.gameModel.ballsMap[startPos] = None
             self.place_ball(ball, endPos)
+            if self.activePlayer.winningThrone == endPos:
+                self.end_game()
             return True
 
-    def view_update(self):
-        self.screen.blit(self.background, self.gauntlet.rect, self.gauntlet.rect)
-
-        self.blackBalls.update()
-        self.blackBalls.clear(self.screen, self.background)
-        self.blackBalls.draw(self.screen)
-
-        self.whiteBalls.update()
-        self.whiteBalls.clear(self.screen, self.background)
-        self.whiteBalls.draw(self.screen)
-
-        self.gauntlet.update()
-        self.screen.blit(self.gauntlet.image, self.gauntlet.rect)
-
+    def end_game(self):
+        print("End game")
+        self.view_update()
+        pygame.time.delay(1000)
+        self.center_blit(self.screen, self.fire.image, Rect(self.board[self.activePlayer.winningThrone]))
         pygame.display.update()
+        pygame.time.delay(1000)
+        raise SystemExit
+
 
