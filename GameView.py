@@ -1,56 +1,12 @@
 import pygame
 from pygame.locals import *
-import os
 from GameModel import *
+from GameMenu import *
 
 if not pygame.font:
     print("Warning, fonts disabled")
 if not pygame.mixer:
     print("Warning, sound disabled")
-
-
-class FunContainer:
-    main_dir = os.path.split(os.path.abspath(__file__))[0]
-    data_dir = os.path.join(main_dir, "resources")
-
-    def __init__(self):
-        pass
-
-    @classmethod
-    def load_image(cls, name, colorkey=None):
-        fullname = os.path.join(cls.data_dir, name)
-        try:
-            image = pygame.image.load(fullname)
-        except pygame.error:
-            print("Cannot load image {}".format(name))
-            raise SystemExit
-        image = image.convert()
-        if colorkey is not None:
-            if colorkey is -1:
-                colorkey = image.get_at((0, 0))
-            image.set_colorkey(colorkey, RLEACCEL)
-        return image
-
-    @classmethod
-    def load_sound(cls, name):
-        class NoneSound:
-            def play(self): pass
-
-        if not pygame.mixer:
-            return NoneSound()
-        fullname = os.path.join(cls.data_dir, name)
-        try:
-            sound = pygame.mixer.Sound(fullname)
-        except pygame.error:
-            print("Cannot load sound: {}".format(name))
-            raise SystemExit
-        return sound
-
-    @classmethod
-    def center_blit(cls, destination: pygame.Surface, image: pygame.Surface, area: pygame.Rect):
-        imageRect = image.get_rect()
-        imageRect.center = area.center
-        destination.blit(image, imageRect)
 
 
 class Ball(pygame.sprite.Sprite):
@@ -137,28 +93,6 @@ class Fire(pygame.sprite.Sprite):
         self.rect.center = rect.center
 
 
-class Gauntlet(pygame.sprite.Sprite):
-    resolution = (60, 60)
-
-    def __init__(self):
-        super().__init__()
-        self.image = FunContainer.load_image("gauntlet2.jpg", -1)
-        self.clickedImage = pygame.transform.scale(self.image, (self.resolution[0]-8, self.resolution[1]-8))
-        self.normalImage = pygame.transform.scale(self.image, self.resolution)
-        self.image = self.normalImage
-        self.rect = self.image.get_rect()
-        pygame.mouse.set_visible(False)
-
-    def update(self):
-        self.rect.midtop = pygame.mouse.get_pos()
-
-    def clicked(self):
-        self.image = self.clickedImage
-
-    def unclicked(self):
-        self.image = self.normalImage
-
-
 class Player:
     def __init__(self, color, balls, winningThrone):
         self.color = color
@@ -167,8 +101,8 @@ class Player:
 
 
 class GameView(FunContainer):
-    windowWidth = 800
-    windowHeight = 800
+    windowWidth = GameMenu.windowWidth
+    windowHeight = GameMenu.windowHeight
     marginWidth = 10
     marginHeight = 10
 
@@ -179,40 +113,40 @@ class GameView(FunContainer):
     cellHeight = np.floor_divide(windowHeight-2*marginHeight, numOfCells)
     marginHeight += np.floor_divide(np.remainder(windowHeight-2*marginHeight, numOfCells), 2)
     linesColor = Color(25, 25, 110)
-    windowName = "Castle game"
 
-    def __init__(self):
+    def __init__(self, screen: pygame.Surface):
         super().__init__()
-        pygame.init()
         self.gameModel = GameModel()
         self.board = self.board_init()
-        self.screen = pygame.display.set_mode((self.windowWidth, self.windowHeight))
-        pygame.display.set_caption(self.windowName)
+
+        self.screen = screen
+
         self.background = FunContainer.load_image("background.jpg")
         self.background = pygame.transform.scale(self.background, (self.windowWidth, self.windowHeight))
         self.draw_lines()
         self.draw_thrones()
 
         self.draw_walls()
-        self.screen.blit(self.background, (0, 0))
 
         self.clock = pygame.time.Clock()
+        self.gauntlet = None
 
         self.fire = Fire()
-        self.gauntlet = Gauntlet()
 
         self.blackBalls = BallsContainer()
         self.whiteBalls = BallsContainer()
         self.balls_init()
 
-        self.blackBalls.draw(self.screen)
-        self.whiteBalls.draw(self.screen)
 
         self.whitePlayer = Player(GameColor.WHITE, self.whiteBalls, self.gameModel.whiteThronePos)
         self.blackPlayer = Player(GameColor.BLACK, self.blackBalls, self.gameModel.blackThronePos)
 
         self.activePlayer = self.player_init()
 
+    def init_draw(self):
+        self.screen.blit(self.background, (0, 0))
+        self.blackBalls.draw(self.screen)
+        self.whiteBalls.draw(self.screen)
         pygame.display.update()
 
     def player_init(self):

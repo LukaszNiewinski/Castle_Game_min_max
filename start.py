@@ -3,9 +3,11 @@
 import pygame
 import GameView
 import GameController
+import GameMenu
 
 if __name__ == "__main__":
-    game = GameView.GameView()
-    gameController = GameController.GameController(game)
-    gameController.main()
-    pygame.quit()
+    pygame.init()
+    gameMenu = GameMenu.GameMenu()
+    game = GameView.GameView(gameMenu.screen)
+    gameController = GameController.GameController(game, gameMenu)
+    gameController.main_menu()
