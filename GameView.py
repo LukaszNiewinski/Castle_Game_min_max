@@ -91,8 +91,12 @@ class Fire(pygame.sprite.Sprite):
         self.image = FunContainer.load_image("fire.jpg", -1)
         self.image = pygame.transform.scale(self.image, self.resolution)
         self.rect = self.image.get_rect()
+        self.fireSound = FunContainer.load_sound("bomb.wav")
+        self.muted = None
 
     def set_rect(self, rect):
+        if not self.muted:
+            self.fireSound.play()
         self.rect.center = rect.center
 
 
@@ -306,7 +310,8 @@ class GameView:
 
         FunContainer.center_blit(self.screen, textImage, rect)
         FunContainer.center_blit(self.screen, textImage2, self.screen.get_rect())
-        FunContainer.center_blit(self.screen, self.fire.image, Rect(self.board[self.activePlayer.winningThrone]))
+        self.fire.set_rect(Rect(self.board[self.activePlayer.winningThrone]))
+        self.screen.blit(self.fire.image, self.fire.rect)
         pygame.display.update()
         pygame.time.delay(3000)
         raise SystemExit

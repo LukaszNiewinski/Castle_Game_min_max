@@ -7,6 +7,8 @@ import GameMenu
 import GameOptions
 
 if __name__ == "__main__":
+    pygame.mixer.pre_init(44100, -16, 2, 4096)
+    pygame.mixer.init()
     pygame.init()
     gameMenu = GameMenu.GameMenu()
     game = GameView.GameView(gameMenu.screen)

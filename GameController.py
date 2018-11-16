@@ -15,11 +15,15 @@ class Gauntlet(pygame.sprite.Sprite):
         self.image = self.normalImage
         self.rect = self.image.get_rect()
         pygame.mouse.set_visible(False)
+        self.clickedSound = FunContainer.load_sound("click.wav")
+        self.muted = None
 
     def update(self):
         self.rect.midtop = pygame.mouse.get_pos()
 
     def clicked(self):
+        if not self.muted:
+            self.clickedSound.play()
         self.image = self.clickedImage
 
     def unclicked(self):
@@ -28,10 +32,16 @@ class Gauntlet(pygame.sprite.Sprite):
 
 class GameController:
     FPS = 30
+    music = "stronghold.mp3"
 
     def __init__(self, game: GameView, gameMenu: GameMenu, gameOptions: GameOptions):
+        self.muted = False
+
         self.gauntlet = Gauntlet()
+        self.gauntlet.muted = self.muted
+
         self.game = game
+        self.game.fire.muted = self.muted
         self.game.gauntlet = self.gauntlet
         self.gameMenu = gameMenu
         self.gameMenu.gauntlet = self.gauntlet
@@ -43,9 +53,15 @@ class GameController:
         self.gameMenu.quitButton.action = self.exit
 
         self.gameOptions.backToMenuButton.action = self.main_menu
+        self.gameOptions.soundButton.action = self.on_off_sound
+
         self.clock = pygame.time.Clock()
 
+        pygame.mixer.music.load(os.path.join(FunContainer.data_dir, self.music))
+
     def main_menu(self):
+        if not pygame.mixer.music.get_busy() and not self.muted:
+            pygame.mixer.music.play(-1)
         pygame.time.delay(500)
         self.gameMenu.init_draw()
         while 1:
@@ -68,6 +84,7 @@ class GameController:
 
     def main_game(self):
         pygame.time.delay(500)
+        pygame.mixer.music.stop()
         self.game.init_draw()
         spriteClicked = None
         while 1:
@@ -123,6 +140,19 @@ class GameController:
                 elif event.type == MOUSEBUTTONUP:
                     self.gauntlet.unclicked()
             self.gameOptions.view_update()
+
+    def on_off_sound(self):
+        print(self.muted)
+        if self.muted:
+            pygame.mixer.unpause()
+            pygame.mixer.music.unpause()
+            self.muted = False
+        else:
+            pygame.mixer.music.stop()
+            pygame.mixer.pause()
+            self.muted = True
+        self.game.fire.muted = self.muted
+        self.gauntlet.muted = self.muted
 
     @classmethod
     def exit(cls):

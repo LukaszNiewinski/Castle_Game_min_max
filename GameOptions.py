@@ -2,7 +2,6 @@ import pygame
 from GameMenu import *
 
 
-class
 
 class GameOptions:
     windowWidth = GameMenu.windowWidth

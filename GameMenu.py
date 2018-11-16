@@ -109,6 +109,7 @@ class GameMenu:
         self.quitButton = Button(55, "Quit", Rect(110, 310, 100, 50))
         self.allButtons = ButtonsContainer()
         self.allButtons.add(self.playButton, self.quitButton, self.optionsButton)
+
         self.gauntlet = None
 
     def init_draw(self):
