@@ -2,6 +2,8 @@ import pygame
 from GameMenu import *
 
 
+class
+
 class GameOptions:
     windowWidth = GameMenu.windowWidth
     windowHeight = GameMenu.windowHeight
@@ -10,11 +12,11 @@ class GameOptions:
         self.screen = screen
         self.background = FunContainer.load_image("castle-options.jpg")
         self.background = pygame.transform.scale(self.background, (self.windowWidth, self.windowHeight))
-        # self.playButton = Button(55, "Play", Rect(110, 90, 100, 50))
-        # self.optionsButton = Button(55, "Options", Rect(110, 200, 100, 50))
-        # self.quitButton = Button(55, "Quit", Rect(110, 310, 100, 50))
+        self.soundButton = Button(55, "Sound", Rect(550, 90, 100, 50))
+        self.changePlayerButton = Button(55, "Player start", Rect(550, 230, 100, 50))
+        self.backToMenuButton = Button(55, "Back to menu", Rect(550, 370, 100, 50))
         self.allButtons = ButtonsContainer()
-        # self.allButtons.add(self.playButton, self.quitButton, self.optionsButton)
+        self.allButtons.add(self.soundButton, self.changePlayerButton, self.backToMenuButton)
         self.gauntlet = None
 
     def init_draw(self):

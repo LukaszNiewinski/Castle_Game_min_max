@@ -42,6 +42,7 @@ class GameController:
         self.gameMenu.optionsButton.action = self.main_options
         self.gameMenu.quitButton.action = self.exit
 
+        self.gameOptions.backToMenuButton.action = self.main_menu
         self.clock = pygame.time.Clock()
 
     def main_menu(self):
@@ -115,9 +116,9 @@ class GameController:
                 elif event.type == MOUSEBUTTONDOWN:
                     self.gauntlet.clicked()
                     pos = pygame.mouse.get_pos()
-                    spriteClicked = self.gameMenu.allButtons.focused_sprite(pos)
+                    spriteClicked = self.gameOptions.allButtons.focused_sprite(pos)
                     if spriteClicked:
-                        self.gameMenu.view_update()
+                        self.gameOptions.view_update()
                         spriteClicked.action()
                 elif event.type == MOUSEBUTTONUP:
                     self.gauntlet.unclicked()
