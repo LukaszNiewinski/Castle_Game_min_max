@@ -147,13 +147,13 @@ class GameView:
         self.whitePlayer = None
         self.blackPlayer = None
 
-        self.reset_state()
+        self.reset_view_state()
 
     def new_game(self):
-        self.gameModel.__init__()
-        self.reset_state()
+        self.gameModel.model_state_init()
+        self.reset_view_state()
 
-    def reset_state(self):
+    def reset_view_state(self):
         self.blackBalls = BallsContainer()
         self.whiteBalls = BallsContainer()
         self.balls_init()
@@ -338,7 +338,7 @@ class GameView:
             with open(self.fileToSave, 'rb') as file:
                 self.gameModel = pickle.load(file)
                 text = "Game loaded"
-                self.reset_state()
+                self.reset_view_state()
         except:
             text = "Cannot open file"
         finally:

@@ -17,18 +17,23 @@ class GameColor(Enum):
 class GameModel:
     numOfCells = 19
 
-    blackBallPositions = [(11, 2), (11, 16), (18, 5), (18, 13), (13, 7), (13, 11), (17, 7), (17, 11)]
-    whiteBallPositions = [(7, 2), (7, 16), (0, 5), (0, 13), (5, 7), (5, 11), (1, 7), (1, 11)]
+    initBlackBallPositions = [(11, 2), (11, 16), (18, 5), (18, 13), (13, 7), (13, 11), (17, 7), (17, 11)]
+    initWhiteBallPositions = [(7, 2), (7, 16), (0, 5), (0, 13), (5, 7), (5, 11), (1, 7), (1, 11)]
 
     blackThronePos = (3, 9)
     whiteThronePos = (15, 9)
 
     def __init__(self):
+        self.activeColor = GameColor.BLACK
+        self.wallsMap = None
+        self.ballsMap = None
+        self.model_state_init()
+
+    def model_state_init(self):
         self.wallsMap = np.array([[False]*self.numOfCells]*19, dtype=bool)
         self.wall_map_init()
         self.ballsMap = np.array([[None]*19]*19, dtype=GameColor)
         self.balls_map_init()
-        self.activeColor = GameColor.BLACK
 
     def wall_map_init(self):
         wallsMap = self.wallsMap
@@ -61,10 +66,10 @@ class GameModel:
         wallsMap[(17, 10)] = True
 
     def balls_map_init(self):
-        for position in self.blackBallPositions:
+        for position in self.initBlackBallPositions:
             self.ballsMap[position] = GameColor.BLACK
 
-        for position in self.whiteBallPositions:
+        for position in self.initWhiteBallPositions:
             self.ballsMap[position] = GameColor.WHITE
 
     def is_something_between(self, map: np.ndarray, startPos: tuple, endPos: tuple, direction, delta, negated=False):

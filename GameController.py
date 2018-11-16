@@ -54,7 +54,10 @@ class GameController:
 
         self.gameOptions.backToMenuButton.action = self.main_menu
         self.gameOptions.soundButton.action = self.on_off_sound
-        self.gameOptions.changePlayerButton.action = self.game.change_player
+        self.gameOptions.changePlayerButton.action = self.change_player
+
+        self.gameOptions.soundIndicator.set_state(self.muted)
+        self.set_player_indicator()
 
         self.clock = pygame.time.Clock()
 
@@ -65,7 +68,7 @@ class GameController:
             pygame.mixer.music.play(-1)
         pygame.time.delay(500)
         self.gameMenu.init_draw()
-        while 1:
+        while True:
             self.clock.tick(self.FPS)
             for event in pygame.event.get():
                 if event.type == QUIT:
@@ -88,13 +91,14 @@ class GameController:
         pygame.mixer.music.stop()
         self.game.init_draw()
         spriteClicked = None
-        while 1:
+        while True:
             self.clock.tick(self.FPS)
             for event in pygame.event.get():
                 if event.type == QUIT:
                     self.exit()
                 elif event.type == KEYDOWN and event.key == K_ESCAPE:
                     self.game.new_game()
+                    self.set_player_indicator()
                     self.main_menu()
                 elif event.type == KEYDOWN and event.key == K_s:
                     self.game.save_game()
@@ -114,6 +118,7 @@ class GameController:
                                 self.game.change_player()
                         except(SystemExit):
                             self.game.new_game()
+                            self.set_player_indicator()
                             self.main_menu()
                         spriteClicked.unclicked()
                         spriteClicked = None
@@ -124,7 +129,7 @@ class GameController:
     def main_options(self):
         pygame.time.delay(500)
         self.gameOptions.init_draw()
-        while 1:
+        while True:
             self.clock.tick(self.FPS)
             for event in pygame.event.get():
                 if event.type == QUIT:
@@ -142,7 +147,19 @@ class GameController:
                     self.gauntlet.unclicked()
             self.gameOptions.view_update()
 
+    def set_player_indicator(self):
+        state = False
+        if self.game.gameModel.activeColor == GameColor.BLACK:
+            state = True
+
+        self.gameOptions.changePlayerIndicator.set_state(state)
+
+    def change_player(self):
+        self.gameOptions.changePlayerIndicator.change_state()
+        self.game.change_player()
+
     def on_off_sound(self):
+        self.gameOptions.soundIndicator.change_state()
         if self.muted:
             pygame.mixer.unpause()
             pygame.mixer.music.play()
