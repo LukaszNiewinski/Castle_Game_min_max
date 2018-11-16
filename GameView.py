@@ -1,7 +1,8 @@
 import pygame
 from pygame.locals import *
+
 from GameModel import *
-from GameMenu import *
+from GameMenu import GameMenu, FunContainer
 
 if not pygame.font:
     print("Warning, fonts disabled")
@@ -94,13 +95,14 @@ class Fire(pygame.sprite.Sprite):
 
 
 class Player:
-    def __init__(self, color, balls, winningThrone):
+    def __init__(self, color, balls, winningThrone, name):
         self.color = color
         self.balls = balls
         self.winningThrone = winningThrone
+        self.name = name
 
 
-class GameView(FunContainer):
+class GameView:
     windowWidth = GameMenu.windowWidth
     windowHeight = GameMenu.windowHeight
     marginWidth = 10
@@ -117,31 +119,35 @@ class GameView(FunContainer):
     def __init__(self, screen: pygame.Surface):
         super().__init__()
         self.gameModel = GameModel()
-        self.board = self.board_init()
 
+        self.board = self.board_init()
         self.screen = screen
 
         self.background = FunContainer.load_image("background.jpg")
         self.background = pygame.transform.scale(self.background, (self.windowWidth, self.windowHeight))
         self.draw_lines()
         self.draw_thrones()
-
         self.draw_walls()
 
-        self.clock = pygame.time.Clock()
         self.gauntlet = None
-
         self.fire = Fire()
 
+        self.blackBalls = None
+        self.whiteBalls = None
+        self.activePlayer = None
+
+        self.whitePlayer = None
+        self.blackPlayer = None
+
+        self.reset_state()
+
+    def reset_state(self):
+        self.gameModel.__init__()
         self.blackBalls = BallsContainer()
         self.whiteBalls = BallsContainer()
         self.balls_init()
-
-
-        self.whitePlayer = Player(GameColor.WHITE, self.whiteBalls, self.gameModel.whiteThronePos)
-        self.blackPlayer = Player(GameColor.BLACK, self.blackBalls, self.gameModel.blackThronePos)
-
         self.activePlayer = self.player_init()
+
 
     def init_draw(self):
         self.screen.blit(self.background, (0, 0))
@@ -150,6 +156,8 @@ class GameView(FunContainer):
         pygame.display.update()
 
     def player_init(self):
+        self.whitePlayer = Player(GameColor.WHITE, self.whiteBalls, self.gameModel.whiteThronePos, "White player")
+        self.blackPlayer = Player(GameColor.BLACK, self.blackBalls, self.gameModel.blackThronePos, 'Black player')
         if self.gameModel.activeColor == GameColor.WHITE:
             return self.whitePlayer
         else:
@@ -187,22 +195,22 @@ class GameView(FunContainer):
 
     def draw_thrones(self):
         resolution = (60, 60)
-        blueThrone = self.load_image("blue-throne.jpg", -1)
-        redThrone = self.load_image("red-throne.jpg", -1)
+        blueThrone = FunContainer.load_image("blue-throne.jpg", -1)
+        redThrone = FunContainer.load_image("red-throne.jpg", -1)
         blueThrone = pygame.transform.scale(blueThrone, resolution)
         redThrone = pygame.transform.scale(redThrone, resolution)
-        self.center_blit(self.background, blueThrone, Rect(self.board[self.gameModel.blackThronePos]))
-        self.center_blit(self.background, redThrone, Rect(self.board[self.gameModel.whiteThronePos]))
+        FunContainer.center_blit(self.background, blueThrone, Rect(self.board[self.gameModel.blackThronePos]))
+        FunContainer.center_blit(self.background, redThrone, Rect(self.board[self.gameModel.whiteThronePos]))
 
 
     def draw_walls(self):
         resolution = (42, 42)
-        wallImage = self.load_image("wall.jpg")
+        wallImage = FunContainer.load_image("wall.jpg")
         wallImage = pygame.transform.scale(wallImage, resolution)
         for i in range(self.numOfCells):
             for j in range(self.numOfCells):
                 if self.gameModel.wallsMap[i][j]:
-                    self.center_blit(self.background, wallImage, Rect(self.board[(i, j)]))
+                    FunContainer.center_blit(self.background, wallImage, Rect(self.board[(i, j)]))
 
     def balls_init(self):
         for i in range(self.numOfCells):
@@ -255,7 +263,7 @@ class GameView(FunContainer):
         sprite = ballsContainer.clicked_sprite(rect.center)
         sprite.kill()
         self.fire.set_rect(rect)
-        self.center_blit(self.screen, self.fire.image, self.fire.rect)
+        FunContainer.center_blit(self.screen, self.fire.image, self.fire.rect)
         pygame.display.update()
         pygame.time.delay(500)
         self.screen.blit(self.background, self.fire.rect, self.fire.rect)
@@ -274,12 +282,19 @@ class GameView(FunContainer):
             return True
 
     def end_game(self):
-        print("End game")
         self.view_update()
-        pygame.time.delay(1000)
-        self.center_blit(self.screen, self.fire.image, Rect(self.board[self.activePlayer.winningThrone]))
+        pygame.time.delay(500)
+        text = "{} won that round".format(self.activePlayer.name)
+        text2 = "Congratulations !"
+        textImage = FunContainer.font_render(text, 55)
+        textImage2 = FunContainer.font_render(text2, 55)
+        rect = Rect(0, 0, self.windowWidth, self.windowHeight - 125)
+
+        FunContainer.center_blit(self.screen, textImage, rect)
+        FunContainer.center_blit(self.screen, textImage2, self.screen.get_rect())
+        FunContainer.center_blit(self.screen, self.fire.image, Rect(self.board[self.activePlayer.winningThrone]))
         pygame.display.update()
-        pygame.time.delay(1000)
+        pygame.time.delay(3000)
         raise SystemExit
 
 

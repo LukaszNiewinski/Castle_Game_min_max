@@ -54,7 +54,6 @@ class FunContainer:
 
 
 class Button(pygame.sprite.Sprite):
-
     def __init__(self, size, text, position):
         super().__init__()
         self.baseImage = FunContainer.font_render(text, size)
@@ -99,6 +98,10 @@ class GameMenu:
     def __init__(self):
         self.screen = pygame.display.set_mode((self.windowWidth, self.windowHeight))
         pygame.display.set_caption(self.windowName)
+        self.icon = FunContainer.load_image("castle-icon.jpg")
+        self.icon = pygame.transform.scale(self.icon, (32, 32))
+        pygame.display.set_icon(self.icon)
+
         self.background = FunContainer.load_image("castle-menu.jpg")
         self.background = pygame.transform.scale(self.background, (self.windowWidth, self.windowHeight))
         self.playButton = Button(55, "Play", Rect(110, 90, 100, 50))

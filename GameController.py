@@ -38,11 +38,13 @@ class GameController:
         self.gameMenu.playButton.action = self.main_game
         self.gameMenu.quitButton.action = self.exit
 
+        self.clock = pygame.time.Clock()
+
     def main_menu(self):
         pygame.time.delay(500)
         self.gameMenu.init_draw()
         while 1:
-            self.game.clock.tick(self.FPS)
+            self.clock.tick(self.FPS)
             for event in pygame.event.get():
                 if event.type == QUIT:
                     self.exit()
@@ -64,11 +66,12 @@ class GameController:
         self.game.init_draw()
         spriteClicked = None
         while 1:
-            self.game.clock.tick(self.FPS)
+            self.clock.tick(self.FPS)
             for event in pygame.event.get():
                 if event.type == QUIT:
                     self.exit()
                 elif event.type == KEYDOWN and event.key == K_ESCAPE:
+                    self.game.reset_state()
                     self.main_menu()
                 elif event.type == MOUSEBUTTONDOWN:
                     self.gauntlet.clicked()
@@ -83,6 +86,7 @@ class GameController:
                             if self.game.move_ball(spriteClicked, pos):
                                 self.game.change_player()
                         except(SystemExit):
+                            self.game.reset_state()
                             self.main_menu()
                         spriteClicked.unclicked()
                         spriteClicked = None
