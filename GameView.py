@@ -148,12 +148,17 @@ class GameView:
         self.balls_init()
         self.activePlayer = self.player_init()
 
-
     def init_draw(self):
         self.screen.blit(self.background, (0, 0))
         self.blackBalls.draw(self.screen)
         self.whiteBalls.draw(self.screen)
+        text = "{} begins".format(self.activePlayer.name)
+        textImage = FunContainer.font_render(text, 55)
+        rect = Rect(0, 0, self.windowWidth, self.windowHeight - 55)
+        FunContainer.center_blit(self.screen, textImage, rect)
         pygame.display.update()
+        pygame.time.delay(1500)
+        self.screen.blit(self.background, (0, 0))
 
     def player_init(self):
         self.whitePlayer = Player(GameColor.WHITE, self.whiteBalls, self.gameModel.whiteThronePos, "White player")

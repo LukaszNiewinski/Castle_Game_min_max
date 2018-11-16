@@ -36,6 +36,7 @@ class GameController:
         self.gameMenu.gauntlet = self.gauntlet
 
         self.gameMenu.playButton.action = self.main_game
+        #self.gameMenu.optionsButton.action = self.main_options
         self.gameMenu.quitButton.action = self.exit
 
         self.clock = pygame.time.Clock()
