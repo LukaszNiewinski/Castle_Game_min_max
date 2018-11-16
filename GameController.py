@@ -54,6 +54,7 @@ class GameController:
 
         self.gameOptions.backToMenuButton.action = self.main_menu
         self.gameOptions.soundButton.action = self.on_off_sound
+        self.gameOptions.changePlayerButton.action = self.game.change_player
 
         self.clock = pygame.time.Clock()
 
@@ -142,10 +143,9 @@ class GameController:
             self.gameOptions.view_update()
 
     def on_off_sound(self):
-        print(self.muted)
         if self.muted:
             pygame.mixer.unpause()
-            pygame.mixer.music.unpause()
+            pygame.mixer.music.play()
             self.muted = False
         else:
             pygame.mixer.music.stop()

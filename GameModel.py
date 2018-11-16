@@ -28,7 +28,7 @@ class GameModel:
         self.wall_map_init()
         self.ballsMap = np.array([[None]*19]*19, dtype=GameColor)
         self.balls_map_init()
-        self.activeColor = GameColor.WHITE
+        self.activeColor = GameColor.BLACK
 
     def wall_map_init(self):
         wallsMap = self.wallsMap
