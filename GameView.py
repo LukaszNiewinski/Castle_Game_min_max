@@ -1,8 +1,10 @@
 import pygame
 from pygame.locals import *
 
+import pickle
+
 from GameModel import *
-from GameMenu import GameMenu, FunContainer
+from GameMenu import *
 
 if not pygame.font:
     print("Warning, fonts disabled")
@@ -114,7 +116,9 @@ class GameView:
     marginWidth += np.floor_divide(np.remainder(windowWidth-2*marginWidth, numOfCells), 2)
     cellHeight = np.floor_divide(windowHeight-2*marginHeight, numOfCells)
     marginHeight += np.floor_divide(np.remainder(windowHeight-2*marginHeight, numOfCells), 2)
-    linesColor = Color(25, 25, 110)
+    linesColor = (25, 25, 110)
+
+    fileToSave = os.path.join(FunContainer.data_dir, "saved.game")
 
     def __init__(self, screen: pygame.Surface):
         super().__init__()
@@ -141,17 +145,17 @@ class GameView:
 
         self.reset_state()
 
-    def reset_state(self):
+    def new_game(self):
         self.gameModel.__init__()
+        self.reset_state()
+
+    def reset_state(self):
         self.blackBalls = BallsContainer()
         self.whiteBalls = BallsContainer()
         self.balls_init()
         self.activePlayer = self.player_init()
 
-    def init_draw(self):
-        self.screen.blit(self.background, (0, 0))
-        self.blackBalls.draw(self.screen)
-        self.whiteBalls.draw(self.screen)
+    def who_start_draw(self):
         text = "{} begins".format(self.activePlayer.name)
         textImage = FunContainer.font_render(text, 55)
         rect = Rect(0, 0, self.windowWidth, self.windowHeight - 55)
@@ -159,6 +163,12 @@ class GameView:
         pygame.display.update()
         pygame.time.delay(1500)
         self.screen.blit(self.background, (0, 0))
+
+    def init_draw(self):
+        self.screen.blit(self.background, (0, 0))
+        self.blackBalls.draw(self.screen)
+        self.whiteBalls.draw(self.screen)
+        self.who_start_draw()
 
     def player_init(self):
         self.whitePlayer = Player(GameColor.WHITE, self.whiteBalls, self.gameModel.whiteThronePos, "White player")
@@ -206,7 +216,6 @@ class GameView:
         redThrone = pygame.transform.scale(redThrone, resolution)
         FunContainer.center_blit(self.background, blueThrone, Rect(self.board[self.gameModel.blackThronePos]))
         FunContainer.center_blit(self.background, redThrone, Rect(self.board[self.gameModel.whiteThronePos]))
-
 
     def draw_walls(self):
         resolution = (42, 42)
@@ -302,4 +311,36 @@ class GameView:
         pygame.time.delay(3000)
         raise SystemExit
 
+    def save_game(self):
+        text = str()
+        try:
+            with open(self.fileToSave, 'wb') as file:
+                pickle.dump(self.gameModel, file)
+                text = "Game saved"
+        except:
+            text = "Cannot write to file"
+        finally:
+            textImage = FunContainer.font_render(text, 55)
+            rect = Rect(0, 0, self.windowWidth, self.windowHeight - 55)
+            FunContainer.center_blit(self.screen, textImage, rect)
+            pygame.display.update()
+            pygame.time.delay(2000)
+            self.screen.blit(self.background, (0, 0))
 
+    def load_game(self):
+        text = str()
+        try:
+            with open(self.fileToSave, 'rb') as file:
+                self.gameModel = pickle.load(file)
+                text = "Game loaded"
+                self.reset_state()
+        except:
+            text = "Cannot open file"
+        finally:
+            textImage = FunContainer.font_render(text, 55)
+            rect = Rect(0, 0, self.windowWidth, self.windowHeight - 55)
+            FunContainer.center_blit(self.screen, textImage, rect)
+            pygame.display.update()
+            pygame.time.delay(1500)
+            self.screen.blit(self.background, (0, 0))
+            self.who_start_draw()

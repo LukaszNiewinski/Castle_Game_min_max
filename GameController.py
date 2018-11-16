@@ -1,5 +1,6 @@
 from GameView import *
 from GameMenu import *
+from GameOptions import *
 import sys
 
 
@@ -28,15 +29,17 @@ class Gauntlet(pygame.sprite.Sprite):
 class GameController:
     FPS = 30
 
-    def __init__(self, game: GameView, gameMenu: GameMenu):
+    def __init__(self, game: GameView, gameMenu: GameMenu, gameOptions: GameOptions):
         self.gauntlet = Gauntlet()
         self.game = game
         self.game.gauntlet = self.gauntlet
         self.gameMenu = gameMenu
         self.gameMenu.gauntlet = self.gauntlet
+        self.gameOptions = gameOptions
+        self.gameOptions.gauntlet = self.gauntlet
 
         self.gameMenu.playButton.action = self.main_game
-        #self.gameMenu.optionsButton.action = self.main_options
+        self.gameMenu.optionsButton.action = self.main_options
         self.gameMenu.quitButton.action = self.exit
 
         self.clock = pygame.time.Clock()
@@ -72,8 +75,12 @@ class GameController:
                 if event.type == QUIT:
                     self.exit()
                 elif event.type == KEYDOWN and event.key == K_ESCAPE:
-                    self.game.reset_state()
+                    self.game.new_game()
                     self.main_menu()
+                elif event.type == KEYDOWN and event.key == K_s:
+                    self.game.save_game()
+                elif event.type == KEYDOWN and event.key == K_l:
+                    self.game.load_game()
                 elif event.type == MOUSEBUTTONDOWN:
                     self.gauntlet.clicked()
                     pos = pygame.mouse.get_pos()
@@ -87,7 +94,7 @@ class GameController:
                             if self.game.move_ball(spriteClicked, pos):
                                 self.game.change_player()
                         except(SystemExit):
-                            self.game.reset_state()
+                            self.game.new_game()
                             self.main_menu()
                         spriteClicked.unclicked()
                         spriteClicked = None
@@ -95,8 +102,32 @@ class GameController:
                     self.gauntlet.unclicked()
             self.game.view_update()
 
+    def main_options(self):
+        pygame.time.delay(500)
+        self.gameOptions.init_draw()
+        while 1:
+            self.clock.tick(self.FPS)
+            for event in pygame.event.get():
+                if event.type == QUIT:
+                    self.exit()
+                elif event.type == KEYDOWN and event.key == K_ESCAPE:
+                    self.main_menu()
+                elif event.type == MOUSEBUTTONDOWN:
+                    self.gauntlet.clicked()
+                    pos = pygame.mouse.get_pos()
+                    spriteClicked = self.gameMenu.allButtons.focused_sprite(pos)
+                    if spriteClicked:
+                        self.gameMenu.view_update()
+                        spriteClicked.action()
+                elif event.type == MOUSEBUTTONUP:
+                    self.gauntlet.unclicked()
+            self.gameOptions.view_update()
+
     @classmethod
     def exit(cls):
         pygame.time.delay(500)
         pygame.quit()
         sys.exit(0)
+
+
+
