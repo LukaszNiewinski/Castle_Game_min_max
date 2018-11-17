@@ -9,7 +9,7 @@ class Gauntlet(pygame.sprite.Sprite):
 
     def __init__(self):
         super().__init__()
-        self.image = FunContainer.load_image("gauntlet2.jpg", -1)
+        self.image = FunContainer.load_image("gauntlet.jpg", -1)
         self.clickedImage = pygame.transform.scale(self.image, (self.resolution[0]-8, self.resolution[1]-8))
         self.normalImage = pygame.transform.scale(self.image, self.resolution)
         self.image = self.normalImage
