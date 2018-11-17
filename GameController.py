@@ -41,7 +41,7 @@ class GameController:
         self.gauntlet.muted = self.muted
 
         self.game = game
-        self.game.fire.muted = self.muted
+        self.game.muted = self.muted
         self.game.gauntlet = self.gauntlet
         self.gameMenu = gameMenu
         self.gameMenu.gauntlet = self.gauntlet
@@ -168,7 +168,7 @@ class GameController:
             pygame.mixer.music.stop()
             pygame.mixer.pause()
             self.muted = True
-        self.game.fire.muted = self.muted
+        self.game.muted = self.muted
         self.gauntlet.muted = self.muted
 
     @classmethod

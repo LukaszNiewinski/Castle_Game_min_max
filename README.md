@@ -60,13 +60,11 @@ All resources are stored in `resources` directory. Links to find them in the Int
 * `wall.jpg`: [link](https://www.kisspng.com/png-stone-wall-brick-clip-art-brick-cliparts-186043/)
 * `white-ball.jpp`: [link](http://www.jmc-billard.com/73-thickbox_default/bille-blanche-magnetique-aramith-o572mm.jpg)
 3. **Sounds**
-* `bomb.wav`: [link](http://soundbible.com/1234-Bomb.html)
+* `snow-ball.wav`: [link](http://soundbible.com/632-Snow-Ball-Throw-And-Splat.html)
 * `click.wav`: [link](http://soundbible.com/783-Click.html)
-* `stronghglod.mp3` [link](https://www.youtube.com/watch?v=Yvy2SQPZOPc)
+* `stronghglod.mp3`: [link](https://www.youtube.com/watch?v=Yvy2SQPZOPc)
 
-
-(polish version below)
-
+---
 # Gra w zamki
 
 ### 1. Wymagania
@@ -79,7 +77,7 @@ All resources are stored in `resources` directory. Links to find them in the Int
 * Pobierz repozytorium projektu i będąc w głównym katalogu wpisz w terminalu:  
 `<python_interpreter> start.py`
 
-### 3. Game rules
+### 3. Zasady gry
 
 * **Typy komórek** - Wyróżnia się 3 typy komórek: mury, 2 trony i zwykłe komórki (ziemia). 
 Na początku wszystkie bile znajdują się na murach.
@@ -95,6 +93,6 @@ Bicie następuje poprzez zastąpienie wrogiego pionka - nie jest obowiązkowe.
 * Wybór rozpoczynającego koloru.
 * Zapis/odczyt stanu gry. Plik zapisu to `resources/saved.game`.
 * Podczas gry:
-    - wciśnij `S` żeby zapisać
-    - wciśnij `L` żeby odczytać  
+    - wciśnij `S` żeby zapisać stan gry do pliku
+    - wciśnij `L` żeby odczytać ostatni zapisany stan gry z pliku
     - wciśnij `ESC` żeby wyjść do menu.

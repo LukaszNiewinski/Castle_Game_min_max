@@ -91,12 +91,9 @@ class Fire(pygame.sprite.Sprite):
         self.image = FunContainer.load_image("fire.jpg", -1)
         self.image = pygame.transform.scale(self.image, self.resolution)
         self.rect = self.image.get_rect()
-        self.fireSound = FunContainer.load_sound("bomb.wav")
         self.muted = None
 
     def set_rect(self, rect):
-        if not self.muted:
-            self.fireSound.play()
         self.rect.center = rect.center
 
 
@@ -139,6 +136,7 @@ class GameView:
 
         self.gauntlet = None
         self.fire = Fire()
+        self.fireSound = FunContainer.load_sound("snow-ball.wav")
 
         self.blackBalls = None
         self.whiteBalls = None
@@ -146,6 +144,8 @@ class GameView:
 
         self.whitePlayer = None
         self.blackPlayer = None
+
+        self.muted = None
 
         self.reset_view_state()
 
@@ -279,6 +279,8 @@ class GameView:
             ballsContainer = self.blackBalls
         rect = Rect(self.board[boardPos])
         sprite = ballsContainer.clicked_sprite(rect.center)
+        if not self.muted:
+            self.fireSound.play()
         sprite.kill()
         self.fire.set_rect(rect)
         FunContainer.center_blit(self.screen, self.fire.image, self.fire.rect)
