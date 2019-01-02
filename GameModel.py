@@ -114,4 +114,19 @@ class GameModel:
         if self.ballsMap[endPos]:
             if self.ballsMap[endPos] == self.activeColor:
                 return False
+        if direction:
+            if self.blackThronePos[0] == startPos[0]:
+                if min(startPos[1], endPos[1])<self.blackThronePos[1]<max(startPos[1], endPos[1]):
+                    return False
+            if self.whiteThronePos[0] == startPos[0]:
+                if min(startPos[1], endPos[1])<self.whiteThronePos[1]<max(startPos[1], endPos[1]):
+                    return False
+        else:
+            if self.blackThronePos[1] == startPos[1]:
+                if min(startPos[0], endPos[0])<self.blackThronePos[0]<max(startPos[0], endPos[0]):
+                    return False
+            if self.whiteThronePos[1] == startPos[1]:
+                if min(startPos[0], endPos[0])<self.whiteThronePos[0]<max(startPos[0], endPos[0]):
+                    return False
+
         return True
