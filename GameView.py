@@ -97,14 +97,6 @@ class Fire(pygame.sprite.Sprite):
         self.rect.center = rect.center
 
 
-class Player:
-    def __init__(self, color, balls, winningThrone, name):
-        self.color = color
-        self.balls = balls
-        self.winningThrone = winningThrone
-        self.name = name
-
-
 class GameView:
     windowWidth = GameMenu.windowWidth
     windowHeight = GameMenu.windowHeight

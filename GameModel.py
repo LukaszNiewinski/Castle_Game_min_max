@@ -14,6 +14,14 @@ class GameColor(Enum):
             return cls.WHITE
 
 
+class Player:
+    def __init__(self, color, balls, winningThrone, name):
+        self.color = color
+        self.balls = balls
+        self.winningThrone = winningThrone
+        self.name = name
+
+
 class GameModel:
     numOfCells = 19
 
@@ -24,7 +32,8 @@ class GameModel:
     whiteThronePos = (15, 9)
 
     def __init__(self):
-        self.activeColor = GameColor.BLACK
+        self.
+        self.activePlayer = GameColor.BLACK
         self.wallsMap = None
         self.ballsMap = None
         self.model_state_init()
