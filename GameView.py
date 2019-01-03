@@ -83,20 +83,6 @@ class BallsContainer(pygame.sprite.RenderPlain):
         return None
 
 
-class Fire(pygame.sprite.Sprite):
-    resolution = (50, 50)
-
-    def __init__(self):
-        super().__init__()
-        self.image = FunContainer.load_image("fire.jpg", -1)
-        self.image = pygame.transform.scale(self.image, self.resolution)
-        self.rect = self.image.get_rect()
-        self.muted = None
-
-    def set_rect(self, rect):
-        self.rect.center = rect.center
-
-
 class GameView:
     windowWidth = GameMenu.windowWidth
     windowHeight = GameMenu.windowHeight
@@ -127,8 +113,6 @@ class GameView:
         self.draw_walls()
 
         self.gauntlet = None
-        self.fire = Fire()
-        self.fireSound = FunContainer.load_sound("snow-ball.wav")
 
         self.blackBalls = None
         self.whiteBalls = None
@@ -271,14 +255,9 @@ class GameView:
             ballsContainer = self.blackBalls
         rect = Rect(self.board[boardPos])
         sprite = ballsContainer.clicked_sprite(rect.center)
-        if not self.muted:
-            self.fireSound.play()
         sprite.kill()
-        self.fire.set_rect(rect)
-        FunContainer.center_blit(self.screen, self.fire.image, self.fire.rect)
         pygame.display.update()
         pygame.time.delay(500)
-        self.screen.blit(self.background, self.fire.rect, self.fire.rect)
 
     def move_ball(self, ball: Ball, endPos: tuple) -> bool:
         startPos = ball.boardPos
@@ -304,8 +283,6 @@ class GameView:
 
         FunContainer.center_blit(self.screen, textImage, rect)
         FunContainer.center_blit(self.screen, textImage2, self.screen.get_rect())
-        self.fire.set_rect(Rect(self.board[self.activePlayer.winningThrone]))
-        self.screen.blit(self.fire.image, self.fire.rect)
         pygame.display.update()
         pygame.time.delay(3000)
         raise SystemExit
