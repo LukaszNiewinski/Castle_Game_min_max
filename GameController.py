@@ -34,7 +34,7 @@ class GameController:
     FPS = 30
     music = "stronghold.mp3"
 
-    def __init__(self, game: GameView, gameMenu: GameMenu, gameOptions: GameOptions):
+    def __init__(self, game: GameView, gameMenu: GameMenu): #,gameOptions: GameOptions):
         self.muted = False
 
         self.gauntlet = Gauntlet()
@@ -45,19 +45,19 @@ class GameController:
         self.game.gauntlet = self.gauntlet
         self.gameMenu = gameMenu
         self.gameMenu.gauntlet = self.gauntlet
-        self.gameOptions = gameOptions
-        self.gameOptions.gauntlet = self.gauntlet
+        # self.gameOptions = gameOptions
+        # self.gameOptions.gauntlet = self.gauntlet
 
         self.gameMenu.playButton.action = self.main_game
-        self.gameMenu.optionsButton.action = self.main_options
+        # self.gameMenu.optionsButton.action = self.main_options
         self.gameMenu.quitButton.action = self.exit
 
-        self.gameOptions.backToMenuButton.action = self.main_menu
-        self.gameOptions.soundButton.action = self.on_off_sound
-        self.gameOptions.changePlayerButton.action = self.change_player
-
-        self.gameOptions.soundIndicator.set_state(self.muted)
-        self.set_player_indicator()
+        # self.gameOptions.backToMenuButton.action = self.main_menu
+        # self.gameOptions.soundButton.action = self.on_off_sound
+        # self.gameOptions.changePlayerButton.action = self.change_player
+        #
+        # self.gameOptions.soundIndicator.set_state(self.muted)
+        # self.set_player_indicator()
 
         self.clock = pygame.time.Clock()
 
@@ -96,14 +96,14 @@ class GameController:
             for event in pygame.event.get():
                 if event.type == QUIT:
                     self.exit()
-                elif event.type == KEYDOWN and event.key == K_ESCAPE:
-                    self.game.new_game()
-                    self.set_player_indicator()
-                    self.main_menu()
-                elif event.type == KEYDOWN and event.key == K_s:
-                    self.game.save_game()
-                elif event.type == KEYDOWN and event.key == K_l:
-                    self.game.load_game()
+                # elif event.type == KEYDOWN and event.key == K_ESCAPE:
+                #     self.game.new_game()
+                #     self.set_player_indicator()
+                #     self.main_menu()
+                # elif event.type == KEYDOWN and event.key == K_s:
+                #     self.game.save_game()
+                # elif event.type == KEYDOWN and event.key == K_l:
+                #     self.game.load_game()
                 elif event.type == MOUSEBUTTONDOWN:
                     self.gauntlet.clicked()
                     pos = pygame.mouse.get_pos()
@@ -126,50 +126,50 @@ class GameController:
                     self.gauntlet.unclicked()
             self.game.view_update()
 
-    def main_options(self):
-        pygame.time.delay(500)
-        self.gameOptions.init_draw()
-        while True:
-            self.clock.tick(self.FPS)
-            for event in pygame.event.get():
-                if event.type == QUIT:
-                    self.exit()
-                elif event.type == KEYDOWN and event.key == K_ESCAPE:
-                    self.main_menu()
-                elif event.type == MOUSEBUTTONDOWN:
-                    self.gauntlet.clicked()
-                    pos = pygame.mouse.get_pos()
-                    spriteClicked = self.gameOptions.allButtons.focused_sprite(pos)
-                    if spriteClicked:
-                        self.gameOptions.view_update()
-                        spriteClicked.action()
-                elif event.type == MOUSEBUTTONUP:
-                    self.gauntlet.unclicked()
-            self.gameOptions.view_update()
+    # def main_options(self):
+    #     pygame.time.delay(500)
+    #     self.gameOptions.init_draw()
+    #     while True:
+    #         self.clock.tick(self.FPS)
+    #         for event in pygame.event.get():
+    #             if event.type == QUIT:
+    #                 self.exit()
+    #             elif event.type == KEYDOWN and event.key == K_ESCAPE:
+    #                 self.main_menu()
+    #             elif event.type == MOUSEBUTTONDOWN:
+    #                 self.gauntlet.clicked()
+    #                 pos = pygame.mouse.get_pos()
+    #                 spriteClicked = self.gameOptions.allButtons.focused_sprite(pos)
+    #                 if spriteClicked:
+    #                     self.gameOptions.view_update()
+    #                     spriteClicked.action()
+    #             elif event.type == MOUSEBUTTONUP:
+    #                 self.gauntlet.unclicked()
+    #         self.gameOptions.view_update()
 
-    def set_player_indicator(self):
-        state = False
-        if self.game.gameModel.activeColor == GameColor.BLACK:
-            state = True
-
-        self.gameOptions.changePlayerIndicator.set_state(state)
-
-    def change_player(self):
-        self.gameOptions.changePlayerIndicator.change_state()
-        self.game.change_player()
-
-    def on_off_sound(self):
-        self.gameOptions.soundIndicator.change_state()
-        if self.muted:
-            pygame.mixer.unpause()
-            pygame.mixer.music.play()
-            self.muted = False
-        else:
-            pygame.mixer.music.stop()
-            pygame.mixer.pause()
-            self.muted = True
-        self.game.muted = self.muted
-        self.gauntlet.muted = self.muted
+    # def set_player_indicator(self):
+    #     state = False
+    #     if self.game.gameModel.activeColor == GameColor.BLACK:
+    #         state = True
+    #
+    #     self.gameOptions.changePlayerIndicator.set_state(state)
+    #
+    # def change_player(self):
+    #     self.gameOptions.changePlayerIndicator.change_state()
+    #     self.game.change_player()
+    #
+    # def on_off_sound(self):
+    #     self.gameOptions.soundIndicator.change_state()
+    #     if self.muted:
+    #         pygame.mixer.unpause()
+    #         pygame.mixer.music.play()
+    #         self.muted = False
+    #     else:
+    #         pygame.mixer.music.stop()
+    #         pygame.mixer.pause()
+    #         self.muted = True
+    #     self.game.muted = self.muted
+    #     self.gauntlet.muted = self.muted
 
     @classmethod
     def exit(cls):

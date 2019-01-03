@@ -141,30 +141,30 @@ class GameView:
 
         self.reset_view_state()
 
-    def new_game(self):
-        self.gameModel.model_state_init()
-        self.reset_view_state()
-
+    # def new_game(self):
+    #     self.gameModel.model_state_init()
+    #     self.reset_view_state()
+    #
     def reset_view_state(self):
         self.blackBalls = BallsContainer()
         self.whiteBalls = BallsContainer()
         self.balls_init()
         self.activePlayer = self.player_init()
 
-    def who_start_draw(self):
-        text = "{} begins".format(self.activePlayer.name)
-        textImage = FunContainer.font_render(text, 55)
-        rect = Rect(0, 0, self.windowWidth, self.windowHeight - 55)
-        FunContainer.center_blit(self.screen, textImage, rect)
-        pygame.display.update()
-        pygame.time.delay(1500)
-        self.screen.blit(self.background, (0, 0))
+    # def who_start_draw(self):
+    #     text = "{} begins".format(self.activePlayer.name)
+    #     textImage = FunContainer.font_render(text, 55)
+    #     rect = Rect(0, 0, self.windowWidth, self.windowHeight - 55)
+    #     FunContainer.center_blit(self.screen, textImage, rect)
+    #     pygame.display.update()
+    #     pygame.time.delay(1500)
+    #     self.screen.blit(self.background, (0, 0))
 
     def init_draw(self):
         self.screen.blit(self.background, (0, 0))
         self.blackBalls.draw(self.screen)
         self.whiteBalls.draw(self.screen)
-        self.who_start_draw()
+        #self.who_start_draw()
 
     def player_init(self):
         self.whitePlayer = Player(GameColor.WHITE, self.whiteBalls, self.gameModel.whiteThronePos, "White player")
@@ -310,36 +310,36 @@ class GameView:
         pygame.time.delay(3000)
         raise SystemExit
 
-    def save_game(self):
-        text = str()
-        try:
-            with open(self.fileToSave, 'wb') as file:
-                pickle.dump(self.gameModel, file)
-                text = "Game saved"
-        except:
-            text = "Cannot write to file"
-        finally:
-            textImage = FunContainer.font_render(text, 55)
-            rect = Rect(0, 0, self.windowWidth, self.windowHeight - 55)
-            FunContainer.center_blit(self.screen, textImage, rect)
-            pygame.display.update()
-            pygame.time.delay(2000)
-            self.screen.blit(self.background, (0, 0))
-
-    def load_game(self):
-        text = str()
-        try:
-            with open(self.fileToSave, 'rb') as file:
-                self.gameModel = pickle.load(file)
-                text = "Game loaded"
-                self.reset_view_state()
-        except:
-            text = "Cannot open file"
-        finally:
-            textImage = FunContainer.font_render(text, 55)
-            rect = Rect(0, 0, self.windowWidth, self.windowHeight - 55)
-            FunContainer.center_blit(self.screen, textImage, rect)
-            pygame.display.update()
-            pygame.time.delay(1500)
-            self.screen.blit(self.background, (0, 0))
-            self.who_start_draw()
+    # def save_game(self):
+    #     text = str()
+    #     try:
+    #         with open(self.fileToSave, 'wb') as file:
+    #             pickle.dump(self.gameModel, file)
+    #             text = "Game saved"
+    #     except:
+    #         text = "Cannot write to file"
+    #     finally:
+    #         textImage = FunContainer.font_render(text, 55)
+    #         rect = Rect(0, 0, self.windowWidth, self.windowHeight - 55)
+    #         FunContainer.center_blit(self.screen, textImage, rect)
+    #         pygame.display.update()
+    #         pygame.time.delay(2000)
+    #         self.screen.blit(self.background, (0, 0))
+    #
+    # def load_game(self):
+    #     text = str()
+    #     try:
+    #         with open(self.fileToSave, 'rb') as file:
+    #             self.gameModel = pickle.load(file)
+    #             text = "Game loaded"
+    #             self.reset_view_state()
+    #     except:
+    #         text = "Cannot open file"
+    #     finally:
+    #         textImage = FunContainer.font_render(text, 55)
+    #         rect = Rect(0, 0, self.windowWidth, self.windowHeight - 55)
+    #         FunContainer.center_blit(self.screen, textImage, rect)
+    #         pygame.display.update()
+    #         pygame.time.delay(1500)
+    #         self.screen.blit(self.background, (0, 0))
+    #         self.who_start_draw()

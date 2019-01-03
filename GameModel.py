@@ -32,8 +32,7 @@ class GameModel:
     whiteThronePos = (15, 9)
 
     def __init__(self):
-        self.
-        self.activePlayer = GameColor.BLACK
+        self.activeColor = GameColor.BLACK
         self.wallsMap = None
         self.ballsMap = None
         self.model_state_init()
