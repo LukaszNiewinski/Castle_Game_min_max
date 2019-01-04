@@ -117,9 +117,10 @@ class GameController:
                             if self.game.move_ball(spriteClicked, pos):
                                 self.game.change_player()
                         except(SystemExit):
-                            self.game.new_game()
-                            self.set_player_indicator()
-                            self.main_menu()
+                            exit(0)
+                            # self.game.new_game()
+                            # self.set_player_indicator()
+                            # self.main_menu()
                         spriteClicked.unclicked()
                         spriteClicked = None
                 elif event.type == MOUSEBUTTONUP:

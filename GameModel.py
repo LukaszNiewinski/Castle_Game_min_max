@@ -15,27 +15,37 @@ class GameColor(Enum):
 
 
 class Player:
-    def __init__(self, color, balls, winningThrone, name):
+    def __init__(self, color, balls, opponentThrone):
         self.color = color
         self.balls = balls
-        self.winningThrone = winningThrone
-        self.name = name
+        self.opponentThrone = opponentThrone
 
 
 class GameModel:
     numOfCells = 19
 
-    initBlackBallPositions = [(11, 2), (11, 16), (18, 5), (18, 13), (13, 7), (13, 11), (17, 7), (17, 11)]
-    initWhiteBallPositions = [(7, 2), (7, 16), (0, 5), (0, 13), (5, 7), (5, 11), (1, 7), (1, 11)]
+    initPlayer1BallPositions = [(11, 2), (11, 16), (18, 5), (18, 13), (13, 7), (13, 11), (17, 7), (17, 11)]
+    initPlayer2BallPositions = [(7, 2), (7, 16), (0, 5), (0, 13), (5, 7), (5, 11), (1, 7), (1, 11)]
 
-    blackThronePos = (3, 9)
-    whiteThronePos = (15, 9)
+    player1ThronePos = (3, 9)
+    player2ThronePos = (15, 9)
+
+    player1Color = GameColor.BLACK
 
     def __init__(self):
         self.activeColor = GameColor.BLACK
         self.wallsMap = None
         self.ballsMap = None
         self.model_state_init()
+        self.player1 = None
+        self.player2 = None
+        self.players_init()
+        self.whiteBalls = None
+        self.blackBalls = None
+
+    def players_init(self):
+        self.player1 = Player(self.player1Color, balls, self.player2ThronePos)
+        self.player2 = Player(GameColor.second_color(self.player1Color), balls, self.player1ThronePos)
 
     def model_state_init(self):
         self.wallsMap = np.array([[False]*self.numOfCells]*19, dtype=bool)
@@ -74,14 +84,14 @@ class GameModel:
         wallsMap[(17, 10)] = True
 
     def balls_map_init(self):
-        for position in self.initBlackBallPositions:
-            self.ballsMap[position] = GameColor.BLACK
+        for position in self.initPlayer1BallPositions:
+            self.ballsMap[position] = self.player1.color
 
-        for position in self.initWhiteBallPositions:
-            self.ballsMap[position] = GameColor.WHITE
+        for position in self.initPlayer2BallPositions:
+            self.ballsMap[position] = self.player2.color
 
     def is_something_between(self, map: np.ndarray, startPos: tuple, endPos: tuple, direction, delta, negated=False):
-        # negated paramter:
+        # negated parameter:
         # if false check if there is any wall between clear cells
         # if true check if there is any clear cell between walls
         if delta < 0:
@@ -123,18 +133,18 @@ class GameModel:
             if self.ballsMap[endPos] == self.activeColor:
                 return False
         if direction:
-            if self.blackThronePos[0] == startPos[0]:
-                if min(startPos[1], endPos[1])<self.blackThronePos[1]<max(startPos[1], endPos[1]):
+            if self.player1ThronePos[0] == startPos[0]:
+                if min(startPos[1], endPos[1]) < self.player1ThronePos[1] < max(startPos[1], endPos[1]):
                     return False
-            if self.whiteThronePos[0] == startPos[0]:
-                if min(startPos[1], endPos[1])<self.whiteThronePos[1]<max(startPos[1], endPos[1]):
+            if self.player2ThronePos[0] == startPos[0]:
+                if min(startPos[1], endPos[1]) < self.player2ThronePos[1] < max(startPos[1], endPos[1]):
                     return False
         else:
-            if self.blackThronePos[1] == startPos[1]:
-                if min(startPos[0], endPos[0])<self.blackThronePos[0]<max(startPos[0], endPos[0]):
+            if self.player1ThronePos[1] == startPos[1]:
+                if min(startPos[0], endPos[0]) < self.player1ThronePos[0] < max(startPos[0], endPos[0]):
                     return False
-            if self.whiteThronePos[1] == startPos[1]:
-                if min(startPos[0], endPos[0])<self.whiteThronePos[0]<max(startPos[0], endPos[0]):
+            if self.player2ThronePos[1] == startPos[1]:
+                if min(startPos[0], endPos[0]) < self.player2ThronePos[0] < max(startPos[0], endPos[0]):
                     return False
 
         return True

@@ -133,7 +133,6 @@ class GameView:
         self.blackBalls = BallsContainer()
         self.whiteBalls = BallsContainer()
         self.balls_init()
-        self.activePlayer = self.player_init()
 
     # def who_start_draw(self):
     #     text = "{} begins".format(self.activePlayer.name)
@@ -150,13 +149,6 @@ class GameView:
         self.whiteBalls.draw(self.screen)
         #self.who_start_draw()
 
-    def player_init(self):
-        self.whitePlayer = Player(GameColor.WHITE, self.whiteBalls, self.gameModel.whiteThronePos, "White player")
-        self.blackPlayer = Player(GameColor.BLACK, self.blackBalls, self.gameModel.blackThronePos, 'Black player')
-        if self.gameModel.activeColor == GameColor.WHITE:
-            return self.whitePlayer
-        else:
-            return self.blackPlayer
 
     def board_init(self):
         board = np.array([[Rect([0]*4)]*self.numOfCells]*self.numOfCells)
