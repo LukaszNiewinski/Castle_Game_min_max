@@ -1,5 +1,11 @@
 import numpy as np
 from enum import Enum
+import pygame
+from pygame.locals import *
+
+
+class EndGame(Exception):
+    pass
 
 
 class GameColor(Enum):
@@ -33,19 +39,17 @@ class GameModel:
     player1Color = GameColor.BLACK
 
     def __init__(self):
-        self.activeColor = GameColor.BLACK
-        self.wallsMap = None
-        self.ballsMap = None
-        self.model_state_init()
         self.player1 = None
         self.player2 = None
         self.players_init()
-        self.whiteBalls = None
-        self.blackBalls = None
+        self.wallsMap = None
+        self.ballsMap = None
+        self.model_state_init()
+        self.activePlayer = self.player1
 
     def players_init(self):
-        self.player1 = Player(self.player1Color, balls, self.player2ThronePos)
-        self.player2 = Player(GameColor.second_color(self.player1Color), balls, self.player1ThronePos)
+        self.player1 = Player(self.player1Color, self.initPlayer1BallPositions.copy(), self.player2ThronePos)
+        self.player2 = Player(GameColor.second_color(self.player1Color), self.initPlayer2BallPositions.copy(), self.player1ThronePos)
 
     def model_state_init(self):
         self.wallsMap = np.array([[False]*self.numOfCells]*19, dtype=bool)
@@ -130,7 +134,7 @@ class GameModel:
         if self.is_something_between(self.ballsMap, startPos, endPos, direction, delta):
             return False
         if self.ballsMap[endPos]:
-            if self.ballsMap[endPos] == self.activeColor:
+            if self.ballsMap[endPos] == self.activePlayer.color:
                 return False
         if direction:
             if self.player1ThronePos[0] == startPos[0]:
@@ -148,3 +152,30 @@ class GameModel:
                     return False
 
         return True
+
+    def change_player(self):
+        self.activePlayer = self.second_player()
+
+    def second_player(self):
+        if self.activePlayer == self.player1:
+            return self.player2
+        else:
+            return self.player1
+
+    def move_ball(self, startPos: tuple, endPos: tuple) -> bool:
+        ballsMoving = self.activePlayer.balls
+        if not self.valid_move(startPos, endPos):
+            return False
+        else:
+            if self.ballsMap[endPos]:
+                self.beat(endPos)
+            self.ballsMap[startPos] = None
+            self.ballsMap[endPos] = self.activePlayer.color
+            ballsMoving[ballsMoving.index(startPos)] = endPos
+            if self.activePlayer.winningThrone == endPos:
+                raise EndGame
+            return True
+
+    def beat(self, endPos: tuple):
+        ballsFromWhichRemoving = self.second_player().balls
+        ballsFromWhichRemoving.remove(endPos)

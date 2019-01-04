@@ -29,7 +29,7 @@ class Ball(pygame.sprite.Sprite):
     def on_init(self):
         self.imageOnFocus = pygame.transform.scale(self.image, (self.resolution[0] + 5, self.resolution[1] + 5))
         self.imageBase = pygame.transform.scale(self.image, (self.resolution[0], self.resolution[1]))
-        self.image = self.imageBase
+        self.image = pygame.transform.scale(self.image, (self.resolution[0], self.resolution[1]))
         self.rectOnFocus = self.imageOnFocus.get_rect()
         self.rectBase = self.imageBase.get_rect()
         self.rect = self.rectBase
@@ -97,7 +97,7 @@ class GameView:
     marginHeight += np.floor_divide(np.remainder(windowHeight-2*marginHeight, numOfCells), 2)
     linesColor = (25, 25, 110)
 
-    fileToSave = os.path.join(FunContainer.data_dir, "saved.game")
+    # fileToSave = os.path.join(FunContainer.data_dir, "saved.game")
 
     def __init__(self, screen: pygame.Surface):
         super().__init__()
@@ -116,10 +116,6 @@ class GameView:
 
         self.blackBalls = None
         self.whiteBalls = None
-        self.activePlayer = None
-
-        self.whitePlayer = None
-        self.blackPlayer = None
 
         self.muted = None
 
@@ -186,8 +182,8 @@ class GameView:
         redThrone = FunContainer.load_image("red-throne.jpg", -1)
         blueThrone = pygame.transform.scale(blueThrone, resolution)
         redThrone = pygame.transform.scale(redThrone, resolution)
-        FunContainer.center_blit(self.background, blueThrone, Rect(self.board[self.gameModel.blackThronePos]))
-        FunContainer.center_blit(self.background, redThrone, Rect(self.board[self.gameModel.whiteThronePos]))
+        FunContainer.center_blit(self.background, blueThrone, Rect(self.board[self.gameModel.player1ThronePos]))
+        FunContainer.center_blit(self.background, redThrone, Rect(self.board[self.gameModel.player2ThronePos]))
 
     def draw_walls(self):
         resolution = (42, 42)
@@ -198,18 +194,8 @@ class GameView:
                 if self.gameModel.wallsMap[i][j]:
                     FunContainer.center_blit(self.background, wallImage, Rect(self.board[(i, j)]))
 
-    def balls_init(self):
-        for i in range(self.numOfCells):
-            for j in range(self.numOfCells):
-                if self.gameModel.ballsMap[(i, j)]:
-                    if self.gameModel.ballsMap[(i, j)] == GameColor.WHITE:
-                        ball = WhiteBall()
-                        self.place_ball(ball, (i, j))
-                        self.whiteBalls.add(ball)
-                    else:
-                        ball = BlackBall()
-                        self.place_ball(ball, (i, j))
-                        self.blackBalls.add(ball)
+    def balls_update(self):
+
 
     def view_update(self):
         self.screen.blit(self.background, self.gauntlet.rect, self.gauntlet.rect)
@@ -227,42 +213,6 @@ class GameView:
 
         pygame.display.update()
 
-    def change_player(self):
-        if self.activePlayer == self.blackPlayer:
-            self.activePlayer = self.whitePlayer
-            self.gameModel.activeColor = GameColor.WHITE
-        else:
-            self.activePlayer = self.blackPlayer
-            self.gameModel.activeColor = GameColor.BLACK
-    
-    def place_ball(self, ball: Ball, boardPos: tuple):
-        self.gameModel.ballsMap[boardPos] = ball.color
-        ball.set_position(Rect(self.board[boardPos]), boardPos)
-
-    def beat(self, boardPos: tuple, ballColor: GameColor):
-        ballsContainer = None
-        if ballColor == GameColor.WHITE:
-            ballsContainer = self.whiteBalls
-        else:
-            ballsContainer = self.blackBalls
-        rect = Rect(self.board[boardPos])
-        sprite = ballsContainer.clicked_sprite(rect.center)
-        sprite.kill()
-        pygame.display.update()
-        pygame.time.delay(500)
-
-    def move_ball(self, ball: Ball, endPos: tuple) -> bool:
-        startPos = ball.boardPos
-        if not self.gameModel.valid_move(startPos, endPos):
-            return False
-        else:
-            if self.gameModel.ballsMap[endPos]:
-                self.beat(endPos, GameColor.second_color(ball.color))
-            self.gameModel.ballsMap[startPos] = None
-            self.place_ball(ball, endPos)
-            if self.activePlayer.winningThrone == endPos:
-                self.end_game()
-            return True
 
     def end_game(self):
         self.view_update()
