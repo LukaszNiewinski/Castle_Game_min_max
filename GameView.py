@@ -19,39 +19,16 @@ class Ball(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.image = None
-        self.imageBase = None
-        self.imageOnFocus = None
         self.rect = None
-        self.rectBase = None
-        self.rectOnFocus = None
-        self.boardPos = None
+
 
     def on_init(self):
-        self.imageOnFocus = pygame.transform.scale(self.image, (self.resolution[0] + 5, self.resolution[1] + 5))
-        self.imageBase = pygame.transform.scale(self.image, (self.resolution[0], self.resolution[1]))
         self.image = pygame.transform.scale(self.image, (self.resolution[0], self.resolution[1]))
-        self.rectOnFocus = self.imageOnFocus.get_rect()
-        self.rectBase = self.imageBase.get_rect()
-        self.rect = self.rectBase
+        self.rect = self.image.get_rect()
 
     def set_position(self, rect: Rect, position):
         self.rect.center = rect.center
         self.boardPos = position
-
-    def clicked(self):
-        self.image = self.imageOnFocus
-        center = self.rect.center
-        self.rect = self.rectOnFocus
-        self.rect.center = center
-
-    def unclicked(self):
-        self.image = self.imageBase
-        center = self.rect.center
-        self.rect = self.rectBase
-        self.rect.center = center
-
-    def update(self):
-        pass
 
 
 class WhiteBall(Ball):
@@ -75,7 +52,7 @@ class BlackBall(Ball):
 class BallsContainer(pygame.sprite.RenderPlain):
     def __init__(self):
         super().__init__()
-    
+
     def clicked_sprite(self, position):
         for sprite in self.sprites():
             if sprite.rect.collidepoint(position):
@@ -97,11 +74,10 @@ class GameView:
     marginHeight += np.floor_divide(np.remainder(windowHeight-2*marginHeight, numOfCells), 2)
     linesColor = (25, 25, 110)
 
-    # fileToSave = os.path.join(FunContainer.data_dir, "saved.game")
 
-    def __init__(self, screen: pygame.Surface):
+    def __init__(self, screen: pygame.Surface, gameModel: GameModel):
         super().__init__()
-        self.gameModel = GameModel()
+        self.gameModel = gameModel
 
         self.board = self.board_init()
         self.screen = screen
@@ -117,33 +93,19 @@ class GameView:
         self.blackBalls = None
         self.whiteBalls = None
 
-        self.muted = None
-
         self.reset_view_state()
 
-    # def new_game(self):
-    #     self.gameModel.model_state_init()
-    #     self.reset_view_state()
     #
     def reset_view_state(self):
         self.blackBalls = BallsContainer()
         self.whiteBalls = BallsContainer()
         self.balls_init()
 
-    # def who_start_draw(self):
-    #     text = "{} begins".format(self.activePlayer.name)
-    #     textImage = FunContainer.font_render(text, 55)
-    #     rect = Rect(0, 0, self.windowWidth, self.windowHeight - 55)
-    #     FunContainer.center_blit(self.screen, textImage, rect)
-    #     pygame.display.update()
-    #     pygame.time.delay(1500)
-    #     self.screen.blit(self.background, (0, 0))
 
     def init_draw(self):
         self.screen.blit(self.background, (0, 0))
         self.blackBalls.draw(self.screen)
         self.whiteBalls.draw(self.screen)
-        #self.who_start_draw()
 
 
     def board_init(self):
@@ -200,65 +162,13 @@ class GameView:
     def view_update(self):
         self.screen.blit(self.background, self.gauntlet.rect, self.gauntlet.rect)
 
-        self.blackBalls.update()
         self.blackBalls.clear(self.screen, self.background)
         self.blackBalls.draw(self.screen)
 
-        self.whiteBalls.update()
         self.whiteBalls.clear(self.screen, self.background)
         self.whiteBalls.draw(self.screen)
 
-        self.gauntlet.update()
         self.screen.blit(self.gauntlet.image, self.gauntlet.rect)
 
         pygame.display.update()
 
-
-    def end_game(self):
-        self.view_update()
-        pygame.time.delay(500)
-        text = "{} won that round".format(self.activePlayer.name)
-        text2 = "Congratulations !"
-        textImage = FunContainer.font_render(text, 55)
-        textImage2 = FunContainer.font_render(text2, 55)
-        rect = Rect(0, 0, self.windowWidth, self.windowHeight - 125)
-
-        FunContainer.center_blit(self.screen, textImage, rect)
-        FunContainer.center_blit(self.screen, textImage2, self.screen.get_rect())
-        pygame.display.update()
-        pygame.time.delay(3000)
-        raise SystemExit
-
-    # def save_game(self):
-    #     text = str()
-    #     try:
-    #         with open(self.fileToSave, 'wb') as file:
-    #             pickle.dump(self.gameModel, file)
-    #             text = "Game saved"
-    #     except:
-    #         text = "Cannot write to file"
-    #     finally:
-    #         textImage = FunContainer.font_render(text, 55)
-    #         rect = Rect(0, 0, self.windowWidth, self.windowHeight - 55)
-    #         FunContainer.center_blit(self.screen, textImage, rect)
-    #         pygame.display.update()
-    #         pygame.time.delay(2000)
-    #         self.screen.blit(self.background, (0, 0))
-    #
-    # def load_game(self):
-    #     text = str()
-    #     try:
-    #         with open(self.fileToSave, 'rb') as file:
-    #             self.gameModel = pickle.load(file)
-    #             text = "Game loaded"
-    #             self.reset_view_state()
-    #     except:
-    #         text = "Cannot open file"
-    #     finally:
-    #         textImage = FunContainer.font_render(text, 55)
-    #         rect = Rect(0, 0, self.windowWidth, self.windowHeight - 55)
-    #         FunContainer.center_blit(self.screen, textImage, rect)
-    #         pygame.display.update()
-    #         pygame.time.delay(1500)
-    #         self.screen.blit(self.background, (0, 0))
-    #         self.who_start_draw()
