@@ -34,7 +34,7 @@ class GameController:
     FPS = 30
     music = "stronghold.mp3"
 
-    def __init__(self, gameView: GameView, gameMenu: GameMenu, gameModel: GameModel):
+    def __init__(self, gameView: GameView, gameMenu: GameMenu):
         self.muted = False
 
         self.gauntlet = Gauntlet()
@@ -48,6 +48,7 @@ class GameController:
         self.gameMenu.playButton.action = self.main_game
         self.gameMenu.quitButton.action = self.exit
 
+        self.gameModel = self.gameView.gameModel
         self.clock = pygame.time.Clock()
 
         pygame.mixer.music.load(os.path.join(FunContainer.data_dir, self.music))

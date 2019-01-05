@@ -21,14 +21,9 @@ class Ball(pygame.sprite.Sprite):
         self.image = None
         self.rect = None
 
-
     def on_init(self):
         self.image = pygame.transform.scale(self.image, (self.resolution[0], self.resolution[1]))
         self.rect = self.image.get_rect()
-
-    def set_position(self, rect: Rect, position):
-        self.rect.center = rect.center
-        self.boardPos = position
 
 
 class WhiteBall(Ball):
@@ -50,14 +45,9 @@ class BlackBall(Ball):
 
 
 class BallsContainer(pygame.sprite.RenderPlain):
-    def __init__(self):
+    def __init__(self, ballsList):
         super().__init__()
-
-    def clicked_sprite(self, position):
-        for sprite in self.sprites():
-            if sprite.rect.collidepoint(position):
-                return sprite
-        return None
+        self.ballsList = ballsList
 
 
 class GameView:
@@ -73,7 +63,6 @@ class GameView:
     cellHeight = np.floor_divide(windowHeight-2*marginHeight, numOfCells)
     marginHeight += np.floor_divide(np.remainder(windowHeight-2*marginHeight, numOfCells), 2)
     linesColor = (25, 25, 110)
-
 
     def __init__(self, screen: pygame.Surface, gameModel: GameModel):
         super().__init__()
@@ -93,20 +82,47 @@ class GameView:
         self.blackBalls = None
         self.whiteBalls = None
 
-        self.reset_view_state()
-
-    #
-    def reset_view_state(self):
-        self.blackBalls = BallsContainer()
-        self.whiteBalls = BallsContainer()
         self.balls_init()
 
+    def balls_init(self):
+        if self.gameModel.player1.color == GameColor.BLACK:
+            blackBalls = self.gameModel.player1.balls
+            whiteBalls = self.gameModel.player2.balls
+        else:
+            blackBalls = self.gameModel.player2.balls
+            whiteBalls = self.gameModel.player1.balls
+        self.blackBalls = BallsContainer(blackBalls)
+        self.whiteBalls = BallsContainer(whiteBalls)
+        for position in self.blackBalls.ballsList:
+            blackBall = BlackBall()
+            blackBall.rect.center = Rect(self.board[position]).center
+            self.blackBalls.add(blackBall)
+        for position in self.whiteBalls.ballsList:
+            whiteBall = WhiteBall()
+            whiteBall.rect.center = Rect(self.board[position]).center
+            self.whiteBalls.add(whiteBall)
+
+    def balls_update(self):
+        activeColor = self.gameModel.activePlayer.color
+        if activeColor == GameColor.WHITE:
+            numOfSprites = len(self.blackBalls)
+            numOfBalls = len(self.blackBalls.ballsList)
+            balls = self.blackBalls
+        else:
+            numOfSprites = len(self.whiteBalls)
+            numOfBalls = len(self.whiteBalls.ballsList)
+            balls = self.whiteBalls
+        if numOfBalls != numOfSprites:
+            balls.sprites[0].kill()
+        for i in range(len(self.whiteBalls)):
+            self.whiteBalls.sprites()[i].center = Rect(self.board[self.whiteBalls.ballsList[i]]).center
+        for i in range(len(self.blackBalls)):
+            self.blackBalls.sprites()[i].center = Rect(self.board[self.whiteBalls.ballsList[i]]).center
 
     def init_draw(self):
         self.screen.blit(self.background, (0, 0))
         self.blackBalls.draw(self.screen)
         self.whiteBalls.draw(self.screen)
-
 
     def board_init(self):
         board = np.array([[Rect([0]*4)]*self.numOfCells]*self.numOfCells)
@@ -155,9 +171,6 @@ class GameView:
             for j in range(self.numOfCells):
                 if self.gameModel.wallsMap[i][j]:
                     FunContainer.center_blit(self.background, wallImage, Rect(self.board[(i, j)]))
-
-    def balls_update(self):
-
 
     def view_update(self):
         self.screen.blit(self.background, self.gauntlet.rect, self.gauntlet.rect)

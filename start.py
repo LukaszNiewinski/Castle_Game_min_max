@@ -4,14 +4,14 @@ import pygame
 import GameView
 import GameController
 import GameMenu
-import GameOptions
+import GameModel
 
 if __name__ == "__main__":
     pygame.mixer.pre_init(44100, -16, 2, 4096)
     pygame.mixer.init()
     pygame.init()
+    gameModel = GameModel.GameModel()
     gameMenu = GameMenu.GameMenu()
-    game = GameView.GameView(gameMenu.screen)
-    # gameOptions = GameOptions.GameOptions(gameMenu.screen)
-    gameController = GameController.GameController(game, gameMenu)  #, gameOptions)
+    gameView = GameView.GameView(gameMenu.screen, gameModel)
+    gameController = GameController.GameController(gameView, gameMenu)
     gameController.main_menu()

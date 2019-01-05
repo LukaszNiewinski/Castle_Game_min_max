@@ -39,17 +39,14 @@ class GameModel:
     player1Color = GameColor.BLACK
 
     def __init__(self):
-        self.player1 = None
-        self.player2 = None
+        self.player1 = Player(self.player1Color, self.initPlayer1BallPositions.copy(), self.player2ThronePos)
+        self.player2 = Player(GameColor.second_color(self.player1Color), self.initPlayer2BallPositions.copy(), self.player1ThronePos)
         self.players_init()
         self.wallsMap = None
         self.ballsMap = None
         self.model_state_init()
         self.activePlayer = self.player1
 
-    def players_init(self):
-        self.player1 = Player(self.player1Color, self.initPlayer1BallPositions.copy(), self.player2ThronePos)
-        self.player2 = Player(GameColor.second_color(self.player1Color), self.initPlayer2BallPositions.copy(), self.player1ThronePos)
 
     def model_state_init(self):
         self.wallsMap = np.array([[False]*self.numOfCells]*19, dtype=bool)
@@ -172,7 +169,7 @@ class GameModel:
             self.ballsMap[startPos] = None
             self.ballsMap[endPos] = self.activePlayer.color
             ballsMoving[ballsMoving.index(startPos)] = endPos
-            if self.activePlayer.winningThrone == endPos:
+            if self.activePlayer.opponentThrone == endPos:
                 raise EndGame
             return True
 
