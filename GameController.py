@@ -42,13 +42,15 @@ class GameController:
 
         self.gameView = gameView
         self.gameView.gauntlet = self.gauntlet
+
+        self.gameModel = self.gameView.gameModel
+
         self.gameMenu = gameMenu
         self.gameMenu.gauntlet = self.gauntlet
 
         self.gameMenu.playButton.action = self.main_game
         self.gameMenu.quitButton.action = self.exit
 
-        self.gameModel = self.gameView.gameModel
         self.clock = pygame.time.Clock()
 
         pygame.mixer.music.load(os.path.join(FunContainer.data_dir, self.music))
@@ -96,23 +98,28 @@ class GameController:
                 #     self.game.load_game()
                 elif event.type == MOUSEBUTTONDOWN:
                     self.gauntlet.clicked()
-                    pos = pygame.mouse.get_pos()
                     if not spriteClicked:
-                        spriteClicked = self.game.activePlayer.balls.clicked_sprite(pos)
-                        if spriteClicked:
-                            spriteClicked.clicked()
+                        pos1 = pygame.mouse.get_pos()
+                        pos1 = self.gameView.cartesian2board(pos1)
+                        ballsClickedColor = self.gameModel.ballsMap[pos1]
+                        if ballsClickedColor == self.gameModel.activePlayer.color:
+                            spriteClicked = True
+                            print("Sprite clicked")
                     else:
-                        pos = self.game.cartesian2board(pos)
+                        pos2 = pygame.mouse.get_pos()
+                        pos2 = self.gameView.cartesian2board(pos2)
                         try:
-                            if self.game.move_ball(spriteClicked, pos):
-                                self.game.change_player()
-                        except(EndGame):
+                            if self.gameModel.move_ball(pos1, pos2):
+                                self.gameView.balls_update()
+                                self.gameModel.change_player()
+                                print("player changed")
+                        except(SystemExit):
                             exit(0)
                             # self.game.new_game()
                             # self.set_player_indicator()
                             # self.main_menu()
-                        spriteClicked.unclicked()
-                        spriteClicked = None
+                        print("Sprite unclicked")
+                        spriteClicked = False
                 elif event.type == MOUSEBUTTONUP:
                     self.gauntlet.unclicked()
             self.gameView.view_update()

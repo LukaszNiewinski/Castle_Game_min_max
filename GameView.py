@@ -83,6 +83,7 @@ class GameView:
         self.whiteBalls = None
 
         self.balls_init()
+        self.init_draw()
 
     def balls_init(self):
         if self.gameModel.player1.color == GameColor.BLACK:
@@ -107,17 +108,17 @@ class GameView:
         if activeColor == GameColor.WHITE:
             numOfSprites = len(self.blackBalls)
             numOfBalls = len(self.blackBalls.ballsList)
-            balls = self.blackBalls
+            balls = self.whiteBalls
+            opballs = self.blackBalls
         else:
             numOfSprites = len(self.whiteBalls)
             numOfBalls = len(self.whiteBalls.ballsList)
-            balls = self.whiteBalls
+            balls = self.blackBalls
+            opballs = self.whiteBalls
         if numOfBalls != numOfSprites:
-            balls.sprites[0].kill()
-        for i in range(len(self.whiteBalls)):
-            self.whiteBalls.sprites()[i].center = Rect(self.board[self.whiteBalls.ballsList[i]]).center
-        for i in range(len(self.blackBalls)):
-            self.blackBalls.sprites()[i].center = Rect(self.board[self.whiteBalls.ballsList[i]]).center
+            opballs.sprites()[0].kill()
+        for i in range(len(balls)):
+            balls.sprites()[i].rect.center = Rect(self.board[balls.ballsList[i]]).center
 
     def init_draw(self):
         self.screen.blit(self.background, (0, 0))
@@ -181,6 +182,7 @@ class GameView:
         self.whiteBalls.clear(self.screen, self.background)
         self.whiteBalls.draw(self.screen)
 
+        self.gauntlet.update()
         self.screen.blit(self.gauntlet.image, self.gauntlet.rect)
 
         pygame.display.update()

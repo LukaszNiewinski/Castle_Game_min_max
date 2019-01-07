@@ -41,7 +41,6 @@ class GameModel:
     def __init__(self):
         self.player1 = Player(self.player1Color, self.initPlayer1BallPositions.copy(), self.player2ThronePos)
         self.player2 = Player(GameColor.second_color(self.player1Color), self.initPlayer2BallPositions.copy(), self.player1ThronePos)
-        self.players_init()
         self.wallsMap = None
         self.ballsMap = None
         self.model_state_init()
