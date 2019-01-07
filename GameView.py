@@ -19,39 +19,11 @@ class Ball(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.image = None
-        self.imageBase = None
-        self.imageOnFocus = None
         self.rect = None
-        self.rectBase = None
-        self.rectOnFocus = None
-        self.boardPos = None
 
     def on_init(self):
-        self.imageOnFocus = pygame.transform.scale(self.image, (self.resolution[0] + 5, self.resolution[1] + 5))
-        self.imageBase = pygame.transform.scale(self.image, (self.resolution[0], self.resolution[1]))
-        self.image = self.imageBase
-        self.rectOnFocus = self.imageOnFocus.get_rect()
-        self.rectBase = self.imageBase.get_rect()
-        self.rect = self.rectBase
-
-    def set_position(self, rect: Rect, position):
-        self.rect.center = rect.center
-        self.boardPos = position
-
-    def clicked(self):
-        self.image = self.imageOnFocus
-        center = self.rect.center
-        self.rect = self.rectOnFocus
-        self.rect.center = center
-
-    def unclicked(self):
-        self.image = self.imageBase
-        center = self.rect.center
-        self.rect = self.rectBase
-        self.rect.center = center
-
-    def update(self):
-        pass
+        self.image = pygame.transform.scale(self.image, (self.resolution[0], self.resolution[1]))
+        self.rect = self.image.get_rect()
 
 
 class WhiteBall(Ball):
@@ -73,36 +45,9 @@ class BlackBall(Ball):
 
 
 class BallsContainer(pygame.sprite.RenderPlain):
-    def __init__(self):
+    def __init__(self, ballsList):
         super().__init__()
-    
-    def clicked_sprite(self, position):
-        for sprite in self.sprites():
-            if sprite.rect.collidepoint(position):
-                return sprite
-        return None
-
-
-class Fire(pygame.sprite.Sprite):
-    resolution = (50, 50)
-
-    def __init__(self):
-        super().__init__()
-        self.image = FunContainer.load_image("fire.jpg", -1)
-        self.image = pygame.transform.scale(self.image, self.resolution)
-        self.rect = self.image.get_rect()
-        self.muted = None
-
-    def set_rect(self, rect):
-        self.rect.center = rect.center
-
-
-class Player:
-    def __init__(self, color, balls, winningThrone, name):
-        self.color = color
-        self.balls = balls
-        self.winningThrone = winningThrone
-        self.name = name
+        self.ballsList = ballsList
 
 
 class GameView:
@@ -119,11 +64,9 @@ class GameView:
     marginHeight += np.floor_divide(np.remainder(windowHeight-2*marginHeight, numOfCells), 2)
     linesColor = (25, 25, 110)
 
-    fileToSave = os.path.join(FunContainer.data_dir, "saved.game")
-
-    def __init__(self, screen: pygame.Surface):
+    def __init__(self, screen: pygame.Surface, gameModel: GameModel):
         super().__init__()
-        self.gameModel = GameModel()
+        self.gameModel = gameModel
 
         self.board = self.board_init()
         self.screen = screen
@@ -135,52 +78,52 @@ class GameView:
         self.draw_walls()
 
         self.gauntlet = None
-        self.fire = Fire()
-        self.fireSound = FunContainer.load_sound("snow-ball.wav")
 
         self.blackBalls = None
         self.whiteBalls = None
-        self.activePlayer = None
 
-        self.whitePlayer = None
-        self.blackPlayer = None
-
-        self.muted = None
-
-        self.reset_view_state()
-
-    def new_game(self):
-        self.gameModel.model_state_init()
-        self.reset_view_state()
-
-    def reset_view_state(self):
-        self.blackBalls = BallsContainer()
-        self.whiteBalls = BallsContainer()
         self.balls_init()
-        self.activePlayer = self.player_init()
+        self.init_draw()
 
-    def who_start_draw(self):
-        text = "{} begins".format(self.activePlayer.name)
-        textImage = FunContainer.font_render(text, 55)
-        rect = Rect(0, 0, self.windowWidth, self.windowHeight - 55)
-        FunContainer.center_blit(self.screen, textImage, rect)
-        pygame.display.update()
-        pygame.time.delay(1500)
-        self.screen.blit(self.background, (0, 0))
+    def balls_init(self):
+        if self.gameModel.player1.color == GameColor.BLACK:
+            blackBalls = self.gameModel.player1.balls
+            whiteBalls = self.gameModel.player2.balls
+        else:
+            blackBalls = self.gameModel.player2.balls
+            whiteBalls = self.gameModel.player1.balls
+        self.blackBalls = BallsContainer(blackBalls)
+        self.whiteBalls = BallsContainer(whiteBalls)
+        for position in self.blackBalls.ballsList:
+            blackBall = BlackBall()
+            blackBall.rect.center = Rect(self.board[position]).center
+            self.blackBalls.add(blackBall)
+        for position in self.whiteBalls.ballsList:
+            whiteBall = WhiteBall()
+            whiteBall.rect.center = Rect(self.board[position]).center
+            self.whiteBalls.add(whiteBall)
+
+    def balls_update(self):
+        activeColor = self.gameModel.activePlayer.color
+        if activeColor == GameColor.WHITE:
+            numOfSprites = len(self.blackBalls)
+            numOfBalls = len(self.blackBalls.ballsList)
+            balls = self.whiteBalls
+            opballs = self.blackBalls
+        else:
+            numOfSprites = len(self.whiteBalls)
+            numOfBalls = len(self.whiteBalls.ballsList)
+            balls = self.blackBalls
+            opballs = self.whiteBalls
+        if numOfBalls != numOfSprites:
+            opballs.sprites()[0].kill()
+        for i in range(len(balls)):
+            balls.sprites()[i].rect.center = Rect(self.board[balls.ballsList[i]]).center
 
     def init_draw(self):
         self.screen.blit(self.background, (0, 0))
         self.blackBalls.draw(self.screen)
         self.whiteBalls.draw(self.screen)
-        self.who_start_draw()
-
-    def player_init(self):
-        self.whitePlayer = Player(GameColor.WHITE, self.whiteBalls, self.gameModel.whiteThronePos, "White player")
-        self.blackPlayer = Player(GameColor.BLACK, self.blackBalls, self.gameModel.blackThronePos, 'Black player')
-        if self.gameModel.activeColor == GameColor.WHITE:
-            return self.whitePlayer
-        else:
-            return self.blackPlayer
 
     def board_init(self):
         board = np.array([[Rect([0]*4)]*self.numOfCells]*self.numOfCells)
@@ -218,8 +161,8 @@ class GameView:
         redThrone = FunContainer.load_image("red-throne.jpg", -1)
         blueThrone = pygame.transform.scale(blueThrone, resolution)
         redThrone = pygame.transform.scale(redThrone, resolution)
-        FunContainer.center_blit(self.background, blueThrone, Rect(self.board[self.gameModel.blackThronePos]))
-        FunContainer.center_blit(self.background, redThrone, Rect(self.board[self.gameModel.whiteThronePos]))
+        FunContainer.center_blit(self.background, blueThrone, Rect(self.board[self.gameModel.player1ThronePos]))
+        FunContainer.center_blit(self.background, redThrone, Rect(self.board[self.gameModel.player2ThronePos]))
 
     def draw_walls(self):
         resolution = (42, 42)
@@ -230,27 +173,12 @@ class GameView:
                 if self.gameModel.wallsMap[i][j]:
                     FunContainer.center_blit(self.background, wallImage, Rect(self.board[(i, j)]))
 
-    def balls_init(self):
-        for i in range(self.numOfCells):
-            for j in range(self.numOfCells):
-                if self.gameModel.ballsMap[(i, j)]:
-                    if self.gameModel.ballsMap[(i, j)] == GameColor.WHITE:
-                        ball = WhiteBall()
-                        self.place_ball(ball, (i, j))
-                        self.whiteBalls.add(ball)
-                    else:
-                        ball = BlackBall()
-                        self.place_ball(ball, (i, j))
-                        self.blackBalls.add(ball)
-
     def view_update(self):
         self.screen.blit(self.background, self.gauntlet.rect, self.gauntlet.rect)
 
-        self.blackBalls.update()
         self.blackBalls.clear(self.screen, self.background)
         self.blackBalls.draw(self.screen)
 
-        self.whiteBalls.update()
         self.whiteBalls.clear(self.screen, self.background)
         self.whiteBalls.draw(self.screen)
 
@@ -259,95 +187,3 @@ class GameView:
 
         pygame.display.update()
 
-    def change_player(self):
-        if self.activePlayer == self.blackPlayer:
-            self.activePlayer = self.whitePlayer
-            self.gameModel.activeColor = GameColor.WHITE
-        else:
-            self.activePlayer = self.blackPlayer
-            self.gameModel.activeColor = GameColor.BLACK
-    
-    def place_ball(self, ball: Ball, boardPos: tuple):
-        self.gameModel.ballsMap[boardPos] = ball.color
-        ball.set_position(Rect(self.board[boardPos]), boardPos)
-
-    def beat(self, boardPos: tuple, ballColor: GameColor):
-        ballsContainer = None
-        if ballColor == GameColor.WHITE:
-            ballsContainer = self.whiteBalls
-        else:
-            ballsContainer = self.blackBalls
-        rect = Rect(self.board[boardPos])
-        sprite = ballsContainer.clicked_sprite(rect.center)
-        if not self.muted:
-            self.fireSound.play()
-        sprite.kill()
-        self.fire.set_rect(rect)
-        FunContainer.center_blit(self.screen, self.fire.image, self.fire.rect)
-        pygame.display.update()
-        pygame.time.delay(500)
-        self.screen.blit(self.background, self.fire.rect, self.fire.rect)
-
-    def move_ball(self, ball: Ball, endPos: tuple) -> bool:
-        startPos = ball.boardPos
-        if not self.gameModel.valid_move(startPos, endPos):
-            return False
-        else:
-            if self.gameModel.ballsMap[endPos]:
-                self.beat(endPos, GameColor.second_color(ball.color))
-            self.gameModel.ballsMap[startPos] = None
-            self.place_ball(ball, endPos)
-            if self.activePlayer.winningThrone == endPos:
-                self.end_game()
-            return True
-
-    def end_game(self):
-        self.view_update()
-        pygame.time.delay(500)
-        text = "{} won that round".format(self.activePlayer.name)
-        text2 = "Congratulations !"
-        textImage = FunContainer.font_render(text, 55)
-        textImage2 = FunContainer.font_render(text2, 55)
-        rect = Rect(0, 0, self.windowWidth, self.windowHeight - 125)
-
-        FunContainer.center_blit(self.screen, textImage, rect)
-        FunContainer.center_blit(self.screen, textImage2, self.screen.get_rect())
-        self.fire.set_rect(Rect(self.board[self.activePlayer.winningThrone]))
-        self.screen.blit(self.fire.image, self.fire.rect)
-        pygame.display.update()
-        pygame.time.delay(3000)
-        raise SystemExit
-
-    def save_game(self):
-        text = str()
-        try:
-            with open(self.fileToSave, 'wb') as file:
-                pickle.dump(self.gameModel, file)
-                text = "Game saved"
-        except:
-            text = "Cannot write to file"
-        finally:
-            textImage = FunContainer.font_render(text, 55)
-            rect = Rect(0, 0, self.windowWidth, self.windowHeight - 55)
-            FunContainer.center_blit(self.screen, textImage, rect)
-            pygame.display.update()
-            pygame.time.delay(2000)
-            self.screen.blit(self.background, (0, 0))
-
-    def load_game(self):
-        text = str()
-        try:
-            with open(self.fileToSave, 'rb') as file:
-                self.gameModel = pickle.load(file)
-                text = "Game loaded"
-                self.reset_view_state()
-        except:
-            text = "Cannot open file"
-        finally:
-            textImage = FunContainer.font_render(text, 55)
-            rect = Rect(0, 0, self.windowWidth, self.windowHeight - 55)
-            FunContainer.center_blit(self.screen, textImage, rect)
-            pygame.display.update()
-            pygame.time.delay(1500)
-            self.screen.blit(self.background, (0, 0))
-            self.who_start_draw()
