@@ -48,7 +48,7 @@ class GameController:
         self.gameMenu = gameMenu
         self.gameMenu.gauntlet = self.gauntlet
 
-        self.gameMenu.playButton.action = self.main_game
+        self.gameMenu.playButton.action = self.player_vs_computer
         self.gameMenu.quitButton.action = self.exit
 
         self.clock = pygame.time.Clock()
@@ -104,7 +104,7 @@ class GameController:
                         ballsClickedColor = self.gameModel.ballsMap[pos1]
                         if ballsClickedColor == self.gameModel.activePlayer.color:
                             spriteClicked = True
-                            print("Sprite clicked")
+                            print("wybrano bile aktywnego gracza")
                     else:
                         pos2 = pygame.mouse.get_pos()
                         pos2 = self.gameView.cartesian2board(pos2)
@@ -112,16 +112,70 @@ class GameController:
                             if self.gameModel.move_ball(pos1, pos2):
                                 self.gameView.balls_update()
                                 self.gameModel.change_player()
-                                print("player changed")
+                                print("poprawnie ruszono bila")
                         except(SystemExit):
                             exit(0)
                             # self.game.new_game()
                             # self.set_player_indicator()
                             # self.main_menu()
-                        print("Sprite unclicked")
                         spriteClicked = False
                 elif event.type == MOUSEBUTTONUP:
                     self.gauntlet.unclicked()
+            self.gameView.view_update()
+
+    def player_vs_computer(self):
+        pygame.time.delay(500)
+        pygame.mixer.music.stop()
+        self.gameView.init_draw()
+        spriteClicked = None
+        player1Turn = True
+        while True:
+            self.clock.tick(self.FPS)
+            for event in pygame.event.get():
+                if event.type == QUIT:
+                    self.exit()
+                # elif event.type == KEYDOWN and event.key == K_ESCAPE:
+                #     self.game.new_game()
+                #     self.set_player_indicator()
+                #     self.main_menu()
+                # elif event.type == KEYDOWN and event.key == K_s:
+                #     self.game.save_game()
+                # elif event.type == KEYDOWN and event.key == K_l:
+                #     self.game.load_game()
+                if player1Turn:
+                    if event.type == MOUSEBUTTONDOWN:
+                        self.gauntlet.clicked()
+                        if not spriteClicked:
+                            pos1 = pygame.mouse.get_pos()
+                            pos1 = self.gameView.cartesian2board(pos1)
+                            ballsClickedColor = self.gameModel.ballsMap[pos1]
+                            if ballsClickedColor == self.gameModel.activePlayer.color:
+                                spriteClicked = True
+                                print("Sprite clicked")
+                        else:
+                            pos2 = pygame.mouse.get_pos()
+                            pos2 = self.gameView.cartesian2board(pos2)
+                            try:
+                                if self.gameModel.move_ball(pos1, pos2):
+                                    self.gameView.balls_update()
+                                    self.gameModel.change_player()
+                                    player1Turn = False
+                                    print("player changed")
+                            except(SystemExit):
+                                exit(0)
+                                # self.game.new_game()
+                                # self.set_player_indicator()
+                                # self.main_menu()
+                            print("Sprite unclicked")
+                            spriteClicked = False
+                    elif event.type == MOUSEBUTTONUP:
+                        self.gauntlet.unclicked()
+                else:
+                    #funkcja inteligent move, atrybut to parametr określający głębokość drzewa przeszukiwania
+                    self.gameModel.intelligent_move(3)
+                    self.gameView.balls_update()
+                    self.gameModel.change_player()
+                    player1Turn = True
             self.gameView.view_update()
 
     @classmethod
@@ -129,6 +183,3 @@ class GameController:
         pygame.time.delay(500)
         pygame.quit()
         sys.exit(0)
-
-
-
