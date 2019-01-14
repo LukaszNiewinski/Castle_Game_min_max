@@ -295,6 +295,16 @@ class GameModel:
             start_value=start_value+(len(node.player1_balls)-len(node.player2_balls))*50000
         return start_value
 
+    def check_if_game_finish(self):
+        for position in self.player1.balls:
+            if position == self.player1ThronePos:
+                print("Player black won!")
+                return True
+        for position in self.player2.balls:
+            if position == self.player2ThronePos:
+                print("Player white won!")
+                return True
+        return False
 
 class Node(GameModel):
     def __init__(self, balls_1: list, balls_2: list, terminal_node=False):
