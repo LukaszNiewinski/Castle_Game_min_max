@@ -104,15 +104,17 @@ class GameController:
                         ballsClickedColor = self.gameModel.ballsMap[pos1]
                         if ballsClickedColor == self.gameModel.activePlayer.color:
                             spriteClicked = True
-                            print("wybrano bile aktywnego gracza")
+                            print("bill taken correctly")
                     else:
                         pos2 = pygame.mouse.get_pos()
                         pos2 = self.gameView.cartesian2board(pos2)
                         try:
                             if self.gameModel.move_ball(pos1, pos2):
                                 self.gameView.balls_update()
+                                if self.gameModel.check_if_game_finish():
+                                    raise EndGame
                                 self.gameModel.change_player()
-                                print("poprawnie ruszono bila")
+                                print("bill moved corectly")
                         except(SystemExit):
                             exit(0)
                             # self.game.new_game()
@@ -174,6 +176,8 @@ class GameController:
                     #funkcja inteligent move, atrybut to parametr określający głębokość drzewa przeszukiwania
                     self.gameModel.intelligent_move(5)
                     self.gameView.balls_update()
+                    if self.gameModel.check_if_game_finish():
+                        raise EndGame
                     self.gameModel.change_player()
                     player1Turn = True
             self.gameView.view_update()
