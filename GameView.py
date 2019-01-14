@@ -105,6 +105,12 @@ class GameView:
 
     def balls_update(self):
         activeColor = self.gameModel.activePlayer.color
+        if self.gameModel.player1Color == GameColor.WHITE:
+            self.whiteBalls.ballsList = self.gameModel.player1.balls
+            self.blackBalls.ballsList = self.gameModel.player2.balls
+        else:
+            self.whiteBalls.ballsList = self.gameModel.player2.balls
+            self.blackBalls.ballsList = self.gameModel.player1.balls
         if activeColor == GameColor.WHITE:
             numOfSprites = len(self.blackBalls)
             numOfBalls = len(self.blackBalls.ballsList)
@@ -186,4 +192,3 @@ class GameView:
         self.screen.blit(self.gauntlet.image, self.gauntlet.rect)
 
         pygame.display.update()
-

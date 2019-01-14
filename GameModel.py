@@ -176,30 +176,35 @@ class GameModel:
         ballsFromWhichRemoving = self.second_player().balls
         ballsFromWhichRemoving.remove(endPos)
 
-#funkcja odpowiadajaca za znalezienie najlepszego stanu potomnego
+# Artificial intelligence core, finds best move and overwrites players bills positions
     def intelligent_move(self, depth):
-        print("Nareszcie moja tura! Jestem obiektem klasy artificial intelligence a moje imie to TwojaPorazkaIsComing! ")
+        print("Artificial inteligence is making it's move!")
+        if self.activePlayer.color == 1:
+            maximizingPlayer=True
+            print("I am a maximizing Player!")
+        else:
+            maximizingPlayer=False
+            print("I am a minimizing Player!")
         current_state = Node(self.player1.balls, self.player2.balls)
-        best_child = self.min_max_algorythm(current_state, depth, False) #zamiast false: self.activePlayer.color
-        self.player1.balls=best_child.player1_balls
-        self.player2.balls=best_child.player2_balls
-        print("pozycje bill gracza czarnego w nowym stanie:", best_child.player1_balls)
-        print("pozycje bill gracza bialego w nowym stanie:", best_child.player2_balls)
+        best_child = self.min_max_algorythm(current_state, depth, maximizingPlayer)
+        self.player1.balls=best_child.player1_balls.copy()
+        self.player2.balls=best_child.player2_balls.copy()
+        print("Black player", len(self.player1.balls), "balls positions in chosen child state:\n", best_child.player1_balls)
+        print("White player", len(self.player2.balls), "balls positions in chosen child state:\n", best_child.player2_balls)
         self.set_balls_map(self.player1.balls, self.player2.balls)
 
-#algorytm min_max wybierający - w zależności od aktywnego gracza stan max albo stan min
-    def min_max_algorythm(self, node, depth, activePlayer):
+# min-max algorythm, it returns the greatest of the child nodes - depends on who is current active player
+    def min_max_algorythm(self, node, depth, maximizingPlayer):
         nodes_evaluation=[]
-        print("Na swoj uzytek wywoluje algorytm min max!")
-        nodes_evaluation=nodes_evaluation+self.alphabeta_prunning_init(node, depth, -np.inf, np.inf, activePlayer)
-        print("Sprawdzilem ", len(nodes_evaluation), " mozliwych nastepnych ruchow")
-        if activePlayer:
+        nodes_evaluation=nodes_evaluation+self.alphabeta_prunning_init(node, depth, -np.inf, np.inf, maximizingPlayer)
+        print("I have checked ", len(nodes_evaluation), " of possible movements to take")
+        if maximizingPlayer:
             i=-np.inf
             for state_and_value in nodes_evaluation:
                 if state_and_value[0]>i:
                     i=state_and_value[0]
                     best_node=state_and_value[1]
-            print("..i wybralem najlepszy z nich!")
+            print("I am maximizing player and I chose one with max value which is", i)
             return best_node
         else:
             i=+np.inf
@@ -207,15 +212,14 @@ class GameModel:
                 if state_and_value[0]<i:
                     i=state_and_value[0]
                     best_node=state_and_value[1]
-            print("..i wybralem najlepszy z nich!")
+            print("I am minimizing player and I chose one with min value which is", i)
             return best_node
 
-#początkowa funkcja wywołująca obcinanie alfa-beta, zwraca node wraz z oceną
+# initilizing alphabetta prunning, returning nodes and evaluated value
     def alphabeta_prunning_init(self, node, depth, alfa, beta, maximizingPlayer):
         depth=depth-1
-        print("By szybciej Cie zniszczyc wywoluje rowniez funkcje alfa_beta!")
         new_nodes=node.generate_new_nodes(maximizingPlayer)
-        print("liczba wygenerowanych child nodes: ", len(new_nodes), "na poziomie -", depth)
+        print("Number of generated child nodes ", len(new_nodes), "from level ", depth+1)
         nodes_and_values=[]
         if maximizingPlayer:
             for state in new_nodes:
@@ -235,13 +239,14 @@ class GameModel:
                     nodes_and_values.append((beta, state))
         return nodes_and_values
 
-#obcinanie alfa-beta działajace rekurencyjnie, zwraca jedynie wartosc
+# alpha-beta prunning working in recursion, returns only value
     def alphabeta_prunning(self, node, depth, alfa, beta, maximizingPlayer):
-        if depth==0: # or terminal_node: potrzeba minimum 11 tur aby osiągnąć stan terminalny
-             return self.heuristic_function(node)
+# it takes at least 11 turns to reach terminal node,
+        if depth==0 or node.terminal_node:
+            return self.heuristic_function(node)
         depth=depth-1
         new_nodes=node.generate_new_nodes(maximizingPlayer)
-        print("liczba wygenerowanych child nodes: ", len(new_nodes), "na poziomie -", depth)
+        print("Number of generated child nodes ", len(new_nodes), "from level ", depth+1)
         if maximizingPlayer:
             for state in new_nodes:
                 new_nodes.remove(state)
@@ -260,46 +265,47 @@ class GameModel:
                 else:
                     return beta
 
-#czarny gracz minimalizuje, bialy gracz maksymalizuje
+# minimize player: WHITE, maximizing player: BLACK
     def heuristic_function(self, node):
-        start_value=10000
-    #sprawdzenie i punktowanie obecności kul w różnych obszarach
-        for ball in node.player1_balls:
-            if ball[0] in range(0,18) and ball[1] in range(8,11):
-                start_value-=500
-            if ball[0] in range(2,17) and ball[1] in range(0,8):
-                start_value-=1000
-            if ball[0] in range(5,14) and ball[1] in range(0,6):
-                start_value-=1000
-            if ball[0] in range(7,12) and ball[1] in range(0,6):
-                start_value-=1000
-            if ball==self.player2ThronePos:
-                start_value-=100000
+        start_value=0
+# checking balls positions, awarding those being in chosen areas of an enemy castle
         for ball in node.player2_balls:
             if ball[0] in range(0,18) and ball[1] in range(8,11):
-                start_value+=1000
+                start_value-=5000
+            if ball[0] in range(2,17) and ball[1] in range(0,8):
+                start_value-=10000
+            if ball[0] in range(5,14) and ball[1] in range(0,6):
+                start_value-=10000
+            if ball[0] in range(7,12) and ball[1] in range(0,6):
+                start_value-=10000
+            if ball==self.player1ThronePos:
+                start_value-=1000000
+        for ball in node.player1_balls:
+            if ball[0] in range(0,18) and ball[1] in range(8,11):
+                start_value+=5000
             if ball[0] in range(2,17) and ball[1] in range(11,19):
-                start_value+=2000
+                start_value+=10000
             if ball[0] in range(5,14) and ball[1] in range(13,19):
-                start_value+=2000
+                start_value+=10000
             if ball[0] in range(7,12) and ball[1] in range(13,19):
-                start_value+=2000
+                start_value+=10000
             if ball==self.player2ThronePos:
-                start_value+=100000
-        #premiowanie gracza z większą ilością bil
-            start_value=start_value+(len(node.player2_balls)-len(node.player1_balls))*20000
+                start_value+=1000000
+# heuristic which awards player with bigger quantity of bills left
+            start_value=start_value+(len(node.player1_balls)-len(node.player2_balls))*50000
         return start_value
 
 
 class Node(GameModel):
-    def __init__(self, balls_1: list, balls_2: list):
+    def __init__(self, balls_1: list, balls_2: list, terminal_node=False):
         self.player1_balls=balls_1
         self.player2_balls=balls_2
+        self.terminal_node=terminal_node
 
-#funkcja znajdujaca stany potomne, generuje w postaci list obiektow klasy Node
-    def generate_new_nodes(self, activePlayer) -> list:
+# function that finds child nodes, returns list of class Node objects
+    def generate_new_nodes(self, maximizingPlayer) -> list:
         child_nodes=[]
-        if activePlayer:
+        if maximizingPlayer:
             for ball in self.player1_balls:
                 list_possible_endpos=self.find_possible_endpos(ball)
                 while list_possible_endpos:
@@ -310,9 +316,11 @@ class Node(GameModel):
                     player1_balls_copy.append(endpos)
                     if endpos in self.player2_balls:
                         player2_balls_copy.remove(endpos)
-                    if endpos == GameModel.player2ThronePos:
-                        print("Szach..!")
-                    child_nodes.append(Node(player1_balls_copy, player2_balls_copy))
+                    if endpos == self.player2ThronePos:
+                        terminal_node=True
+                        print("Terminal node found! Check..!")
+                    else: terminal_node=False
+                    child_nodes.append(Node(player1_balls_copy, player2_balls_copy, terminal_node))
         else:
             for ball in self.player2_balls:
                 list_possible_endpos=self.find_possible_endpos(ball)
@@ -324,12 +332,14 @@ class Node(GameModel):
                     player2_balls_copy.append(endpos)
                     if endpos in self.player1_balls:
                         player1_balls_copy.remove(endpos)
-                    if endpos == GameModel.player1ThronePos:
-                        print("Szach..!")
-                    child_nodes.append(Node(player1_balls_copy, player2_balls_copy))
+                    if endpos == self.player1ThronePos:
+                        terminal_node=True
+                        print("Terminal node found! Check..!")
+                    else: terminal_node=False
+                    child_nodes.append(Node(player1_balls_copy, player2_balls_copy, terminal_node))
         return child_nodes
 
-#funkcja znajdujaca mozliwe ruchy(endPos'itions) bili podanej na wejsciu
+# function that finds possible endpositions for ball position on input
     def find_possible_endpos(self, ball: tuple) -> list:
             list_endpos=[]
             i=ball[0]

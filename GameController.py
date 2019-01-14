@@ -172,7 +172,7 @@ class GameController:
                         self.gauntlet.unclicked()
                 else:
                     #funkcja inteligent move, atrybut to parametr określający głębokość drzewa przeszukiwania
-                    self.gameModel.intelligent_move(3)
+                    self.gameModel.intelligent_move(5)
                     self.gameView.balls_update()
                     self.gameModel.change_player()
                     player1Turn = True
