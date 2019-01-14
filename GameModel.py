@@ -85,6 +85,7 @@ class GameModel:
         wallsMap[(17, 10)] = True
 
     def set_balls_map(self, player1_balls, player2_balls):
+        self.ballsMap = np.array([[None]*19]*19, dtype=GameColor)
         for position in player1_balls:
             self.ballsMap[position] = self.player1.color
         for position in player2_balls:
