@@ -174,7 +174,7 @@ class GameController:
                         self.gauntlet.unclicked()
                 else:
                     #funkcja inteligent move, atrybut to parametr określający głębokość drzewa przeszukiwania
-                    self.gameModel.intelligent_move(5)
+                    self.gameModel.intelligent_move(4)
                     self.gameView.balls_update()
                     if self.gameModel.check_if_game_finish():
                         raise EndGame
