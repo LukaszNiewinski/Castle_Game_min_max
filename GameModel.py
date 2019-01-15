@@ -128,11 +128,6 @@ class GameModel:
         else:
             if self.is_something_between(GameModel.wallsMap, startPos, endPos, direction, delta, True):
                 return False
-    #    if self.is_something_between(self.ballsMap, startPos, endPos, direction, delta):
-    #        return False
-    #    if self.balls_Map[endPos]:
-    #        if self.balls_Map[endPos] == self.activePlayer.color:
-    #            return False
         if direction:
             if self.player1ThronePos[0] == startPos[0]:
                 if min(startPos[1], endPos[1]) < self.player1ThronePos[1] < max(startPos[1], endPos[1]):
@@ -179,33 +174,28 @@ class GameModel:
 
 # Artificial intelligence core, finds best move and overwrites players bills positions
     def intelligent_move(self, depth):
-        print("Artificial inteligence is making it's move!")
         if self.activePlayer.color == 1:
             maximizingPlayer=True
-            print("I am a maximizing Player!")
         else:
             maximizingPlayer=False
-            print("I am a minimizing Player!")
         current_state = Node(self.player1.balls, self.player2.balls)
         best_child = self.min_max_algorythm(current_state, depth, maximizingPlayer)
         self.player1.balls=best_child.player1_balls.copy()
         self.player2.balls=best_child.player2_balls.copy()
-        print("Black player", len(self.player1.balls), "balls positions in chosen child state:\n", best_child.player1_balls)
-        print("White player", len(self.player2.balls), "balls positions in chosen child state:\n", best_child.player2_balls)
         self.set_balls_map(self.player1.balls, self.player2.balls)
 
 # min-max algorythm, it returns the greatest of the child nodes - depends on who is current active player
     def min_max_algorythm(self, node, depth, maximizingPlayer):
         nodes_evaluation=[]
         nodes_evaluation=nodes_evaluation+self.alphabeta_prunning_init(node, depth, -np.inf, np.inf, maximizingPlayer)
-        print("I have checked ", len(nodes_evaluation), " of possible movements to take")
+#        print("I have checked ", len(nodes_evaluation), " of possible movements to take")
         if maximizingPlayer:
             i=-np.inf
             for state_and_value in nodes_evaluation:
                 if state_and_value[0]>i:
                     i=state_and_value[0]
                     best_node=state_and_value[1]
-            print("I am maximizing player and I chose one with max value which is", i)
+#            print("I am maximizing player and I chose one with max value which is", i)
             return best_node
         else:
             i=+np.inf
@@ -213,18 +203,17 @@ class GameModel:
                 if state_and_value[0]<i:
                     i=state_and_value[0]
                     best_node=state_and_value[1]
-            print("I am minimizing player and I chose one with min value which is", i)
+#            print("I am minimizing player and I chose one with min value which is", i)
             return best_node
 
 # initilizing alphabetta prunning, returning nodes and evaluated value
     def alphabeta_prunning_init(self, node, depth, alfa, beta, maximizingPlayer):
         depth=depth-1
         new_nodes=node.generate_new_nodes(maximizingPlayer)
-        print("Number of generated child nodes ", len(new_nodes), "from level ", depth+1)
+#        print("Number of generated child nodes ", len(new_nodes), "from level ", depth+1)
         nodes_and_values=[]
         if maximizingPlayer:
             for state in new_nodes:
-                new_nodes.remove(state)
                 alfa=max(alfa, self.alphabeta_prunning(state,depth,alfa,beta, False))
                 if alfa>=beta:
                     nodes_and_values.append((beta, state))
@@ -232,7 +221,6 @@ class GameModel:
                     nodes_and_values.append((alfa, state))
         else:
             for state in new_nodes:
-                new_nodes.remove(state)
                 beta=min(beta, self.alphabeta_prunning(state,depth,alfa,beta, True))
                 if alfa>=beta:
                     nodes_and_values.append((alfa, state))
@@ -247,24 +235,20 @@ class GameModel:
             return self.heuristic_function(node)
         depth=depth-1
         new_nodes=node.generate_new_nodes(maximizingPlayer)
-        print("Number of generated child nodes ", len(new_nodes), "from level ", depth+1)
+#        print("Number of generated child nodes ", len(new_nodes), "from level ", depth+1)
         if maximizingPlayer:
             for state in new_nodes:
-                new_nodes.remove(state)
                 alfa=max(alfa, self.alphabeta_prunning(state,depth,alfa,beta, False))
                 if alfa>=beta:
                     return beta
-                else:
-                    return alfa
+            return alfa
         else:
             value=np.inf
             for state in new_nodes:
-                new_nodes.remove(state)
                 beta=min(beta, self.alphabeta_prunning(state,depth,alfa,beta, True))
                 if alfa>=beta:
                     return alfa
-                else:
-                    return beta
+            return beta
 
 # minimize player: WHITE, maximizing player: BLACK
     def heuristic_function(self, node):
@@ -272,28 +256,28 @@ class GameModel:
 # checking balls positions, awarding those being in chosen areas of an enemy castle
         for ball in node.player2_balls:
             if ball[0] in range(0,18) and ball[1] in range(8,11):
-                start_value-=5000
+                start_value-=5
             if ball[0] in range(2,17) and ball[1] in range(0,8):
-                start_value-=10000
+                start_value-=10
             if ball[0] in range(5,14) and ball[1] in range(0,6):
-                start_value-=10000
+                start_value-=10
             if ball[0] in range(7,12) and ball[1] in range(0,6):
-                start_value-=10000
+                start_value-=10
             if ball==self.player1ThronePos:
                 start_value-=1000000
         for ball in node.player1_balls:
             if ball[0] in range(0,18) and ball[1] in range(8,11):
-                start_value+=5000
+                start_value+=5
             if ball[0] in range(2,17) and ball[1] in range(11,19):
-                start_value+=10000
+                start_value+=10
             if ball[0] in range(5,14) and ball[1] in range(13,19):
-                start_value+=10000
+                start_value+=10
             if ball[0] in range(7,12) and ball[1] in range(13,19):
-                start_value+=10000
+                start_value+=10
             if ball==self.player2ThronePos:
                 start_value+=1000000
 # heuristic which awards player with bigger quantity of bills left
-            start_value=start_value+(len(node.player1_balls)-len(node.player2_balls))*50000
+            start_value=start_value+(len(node.player1_balls)-len(node.player2_balls))*15
         return start_value
 
     def check_if_game_finish(self):
