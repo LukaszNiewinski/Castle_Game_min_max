@@ -174,7 +174,7 @@ class GameModel:
 
 # Artificial intelligence core, finds best move and overwrites players bills positions
     def intelligent_move(self, depth):
-        if self.activePlayer.color == self.player1Color::
+        if self.activePlayer.color == self.player1Color:
             maximizingPlayer=True
         else:
             maximizingPlayer=False
