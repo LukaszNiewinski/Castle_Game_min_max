@@ -174,7 +174,7 @@ class GameModel:
 
 # Artificial intelligence core, finds best move and overwrites players bills positions
     def intelligent_move(self, depth):
-        if self.activePlayer.color == 1:
+        if self.activePlayer.color == self.player1Color::
             maximizingPlayer=True
         else:
             maximizingPlayer=False
@@ -265,7 +265,7 @@ class GameModel:
                 start_value-=10
             if ball==self.player1ThronePos:
                 start_value-=1000000
-        for ball in node.player1_balls:
+        for ball in node.player2_balls:
             if ball[0] in range(0,18) and ball[1] in range(8,11):
                 start_value+=5
             if ball[0] in range(2,17) and ball[1] in range(11,19):
@@ -274,7 +274,7 @@ class GameModel:
                 start_value+=10
             if ball[0] in range(7,12) and ball[1] in range(13,19):
                 start_value+=10
-            if ball==self.player2ThronePos:
+            if ball==self.player1ThronePos:
                 start_value+=1000000
 # heuristic which awards player with bigger quantity of bills left
             start_value=start_value+(len(node.player1_balls)-len(node.player2_balls))*15
@@ -311,7 +311,7 @@ class Node(GameModel):
                     player1_balls_copy.append(endpos)
                     if endpos in self.player2_balls:
                         player2_balls_copy.remove(endpos)
-                    if endpos == self.player2ThronePos:
+                    if endpos == self.player1ThronePos:
                         terminal_node=True
                         print("Terminal node found! Check..!")
                     else: terminal_node=False
@@ -327,7 +327,7 @@ class Node(GameModel):
                     player2_balls_copy.append(endpos)
                     if endpos in self.player1_balls:
                         player1_balls_copy.remove(endpos)
-                    if endpos == self.player1ThronePos:
+                    if endpos == self.player2ThronePos:
                         terminal_node=True
                         print("Terminal node found! Check..!")
                     else: terminal_node=False
