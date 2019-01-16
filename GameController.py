@@ -78,6 +78,8 @@ class GameController:
                     self.gauntlet.unclicked()
             self.gameMenu.view_update()
 
+
+
     def main_game(self):
         pygame.time.delay(500)
         pygame.mixer.music.stop()
@@ -123,6 +125,45 @@ class GameController:
                         spriteClicked = False
                 elif event.type == MOUSEBUTTONUP:
                     self.gauntlet.unclicked()
+            self.gameView.view_update()
+
+    def computer_vs_computer(self):
+        pygame.time.delay(500)
+        pygame.mixer.music.stop()
+        self.gameView.init_draw()
+        player1Turn = True
+        while True:
+            self.clock.tick(self.FPS)
+            for event in pygame.event.get():
+                if event.type == QUIT:
+                    self.exit()
+                # elif event.type == KEYDOWN and event.key == K_ESCAPE:
+                #     self.game.new_game()
+                #     self.set_player_indicator()
+                #     self.main_menu()
+                # elif event.type == KEYDOWN and event.key == K_s:
+                #     self.game.save_game()
+                # elif event.type == KEYDOWN and event.key == K_l:
+                #     self.game.load_game()
+                if player1Turn:
+                    if event.type == MOUSEBUTTONDOWN:
+                        self.gauntlet.clicked()
+                        self.gameModel.intelligent_move(3)
+                        self.gameView.balls_update()
+                        if self.gameModel.check_if_game_finish():
+                            raise EndGame
+                        self.gameModel.change_player()
+                        player1Turn = False
+                    elif event.type == MOUSEBUTTONUP:
+                        self.gauntlet.unclicked()
+                else:
+                    #funkcja inteligent move, atrybut to parametr określający głębokość drzewa przeszukiwania
+                    self.gameModel.intelligent_move(5)
+                    self.gameView.balls_update()
+                    if self.gameModel.check_if_game_finish():
+                        raise EndGame
+                    self.gameModel.change_player()
+                    player1Turn = True
             self.gameView.view_update()
 
     def player_vs_computer(self):
