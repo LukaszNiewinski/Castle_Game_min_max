@@ -147,23 +147,23 @@ class GameController:
                 #     self.game.load_game()
                 if player1Turn:
                     if event.type == MOUSEBUTTONDOWN:
-                        self.gauntlet.clicked()
+                        print("Player 1 - Black - is making his move", self.gameModel.activePlayer.color)
                         self.gameModel.intelligent_move(3)
                         self.gameView.balls_update()
+                        print("Computer 1 made his move!")
                         if self.gameModel.check_if_game_finish():
                             raise EndGame
-                        self.gameModel.change_player()
                         player1Turn = False
-                    elif event.type == MOUSEBUTTONUP:
-                        self.gauntlet.unclicked()
+                        self.gameModel.change_player()
                 else:
-                    #funkcja inteligent move, atrybut to parametr określający głębokość drzewa przeszukiwania
-                    self.gameModel.intelligent_move(5)
+                    print("Player 2 - White - is making his move", self.gameModel.activePlayer.color)
+                    self.gameModel.intelligent_move(1)
                     self.gameView.balls_update()
+                    print("Computer 2 made his move!")
                     if self.gameModel.check_if_game_finish():
                         raise EndGame
-                    self.gameModel.change_player()
                     player1Turn = True
+                    self.gameModel.change_player()
             self.gameView.view_update()
 
     def player_vs_computer(self):
