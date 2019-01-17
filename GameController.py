@@ -108,14 +108,8 @@ class GameController:
             for event in pygame.event.get():
                 if event.type == QUIT:
                     self.exit()
-                # elif event.type == KEYDOWN and event.key == K_ESCAPE:
-                #     self.game.new_game()
-                #     self.set_player_indicator()
-                #     self.main_menu()
-                # elif event.type == KEYDOWN and event.key == K_s:
-                #     self.game.save_game()
-                # elif event.type == KEYDOWN and event.key == K_l:
-                #     self.game.load_game()
+                elif event.type == KEYDOWN and event.key == K_ESCAPE:
+                    self.main_menu()
                 elif event.type == MOUSEBUTTONDOWN:
                     self.gauntlet.clicked()
                     if not spriteClicked:
@@ -155,14 +149,8 @@ class GameController:
             for event in pygame.event.get():
                 if event.type == QUIT:
                     self.exit()
-                # elif event.type == KEYDOWN and event.key == K_ESCAPE:
-                #     self.game.new_game()
-                #     self.set_player_indicator()
-                #     self.main_menu()
-                # elif event.type == KEYDOWN and event.key == K_s:
-                #     self.game.save_game()
-                # elif event.type == KEYDOWN and event.key == K_l:
-                #     self.game.load_game()
+                elif event.type == KEYDOWN and event.key == K_ESCAPE:
+                    self.main_menu()
                 if player1Turn:
                     if event.type == MOUSEBUTTONDOWN:
                         print("Player 1 - Black - is making his move", self.gameModel.activePlayer.color)
@@ -195,14 +183,8 @@ class GameController:
             for event in pygame.event.get():
                 if event.type == QUIT:
                     self.exit()
-                # elif event.type == KEYDOWN and event.key == K_ESCAPE:
-                #     self.game.new_game()
-                #     self.set_player_indicator()
-                #     self.main_menu()
-                # elif event.type == KEYDOWN and event.key == K_s:
-                #     self.game.save_game()
-                # elif event.type == KEYDOWN and event.key == K_l:
-                #     self.game.load_game()
+                elif event.type == KEYDOWN and event.key == K_ESCAPE:
+                    self.main_menu()
                 if player1Turn:
                     if event.type == MOUSEBUTTONDOWN:
                         self.gauntlet.clicked()
@@ -279,10 +261,12 @@ class GameController:
             pygame.mixer.unpause()
             pygame.mixer.music.play()
             self.muted = False
+            print("Sound turned on")
         else:
             pygame.mixer.music.stop()
             pygame.mixer.pause()
             self.muted = True
+            print("Sound turned off")
         self.gauntlet.muted = self.muted
 
     @classmethod
