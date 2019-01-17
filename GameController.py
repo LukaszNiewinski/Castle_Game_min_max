@@ -1,6 +1,7 @@
 from GameView import *
 from GameMenu import *
 from GameModel import *
+from GameOptions import *
 import sys
 
 
@@ -34,8 +35,10 @@ class GameController:
     FPS = 30
     music = "stronghold.mp3"
 
-    def __init__(self, gameView: GameView, gameMenu: GameMenu):
+    def __init__(self, gameView: GameView, gameMenu: GameMenu, gameOptions: GameOptions, deep: tuple):
         self.muted = False
+        self.game_mode = None
+        self.deep = deep
 
         self.gauntlet = Gauntlet()
         self.gauntlet.muted = self.muted
@@ -45,15 +48,30 @@ class GameController:
 
         self.gameModel = self.gameView.gameModel
 
+        self.gameOptions = gameOptions
+        self.gameOptions.gauntlet = self.gauntlet
+
+        self.gameOptions.backToMenuButton.action = self.main_menu
+        self.gameOptions.soundButton.action = self.on_off_sound
+        self.gameOptions.changePlayerButton.action = self.change_mode
+
+        self.set_indicators()
+
         self.gameMenu = gameMenu
         self.gameMenu.gauntlet = self.gauntlet
+        self.gameMenu.optionsButton.action = self.main_options
 
-        self.gameMenu.playButton.action = self.player_vs_computer
+        self.gameMenu.playButton.action = self.game_mode
         self.gameMenu.quitButton.action = self.exit
 
         self.clock = pygame.time.Clock()
 
         pygame.mixer.music.load(os.path.join(FunContainer.data_dir, self.music))
+
+    def set_indicators(self):
+        self.gameOptions.changePlayerIndicator.set_state(False)
+        self.gameOptions.soundIndicator.set_state(False)
+        self.game_mode = self.player_vs_computer
 
     def main_menu(self):
         if not pygame.mixer.music.get_busy() and not self.muted:
@@ -148,7 +166,7 @@ class GameController:
                 if player1Turn:
                     if event.type == MOUSEBUTTONDOWN:
                         print("Player 1 - Black - is making his move", self.gameModel.activePlayer.color)
-                        self.gameModel.intelligent_move(3)
+                        self.gameModel.intelligent_move(self.deep[0])
                         self.gameView.balls_update()
                         print("Computer 1 made his move!")
                         if self.gameModel.check_if_game_finish():
@@ -157,7 +175,7 @@ class GameController:
                         self.gameModel.change_player()
                 else:
                     print("Player 2 - White - is making his move", self.gameModel.activePlayer.color)
-                    self.gameModel.intelligent_move(1)
+                    self.gameModel.intelligent_move(self.deep[1])
                     self.gameView.balls_update()
                     print("Computer 2 made his move!")
                     if self.gameModel.check_if_game_finish():
@@ -215,13 +233,57 @@ class GameController:
                         self.gauntlet.unclicked()
                 else:
                     #funkcja inteligent move, atrybut to parametr określający głębokość drzewa przeszukiwania
-                    self.gameModel.intelligent_move(4)
+                    self.gameModel.intelligent_move(self.deep[1])
                     self.gameView.balls_update()
                     if self.gameModel.check_if_game_finish():
                         raise EndGame
                     self.gameModel.change_player()
                     player1Turn = True
             self.gameView.view_update()
+
+    def main_options(self):
+        pygame.time.delay(500)
+        self.gameOptions.init_draw()
+        while True:
+            self.clock.tick(self.FPS)
+            for event in pygame.event.get():
+                if event.type == QUIT:
+                    self.exit()
+                elif event.type == KEYDOWN and event.key == K_ESCAPE:
+                    self.main_menu()
+                elif event.type == MOUSEBUTTONDOWN:
+                    self.gauntlet.clicked()
+                    pos = pygame.mouse.get_pos()
+                    spriteClicked = self.gameOptions.allButtons.focused_sprite(pos)
+                    if spriteClicked:
+                        self.gameOptions.view_update()
+                        spriteClicked.action()
+                elif event.type == MOUSEBUTTONUP:
+                    self.gauntlet.unclicked()
+            self.gameOptions.view_update()
+
+    def change_mode(self):
+        self.gameOptions.changePlayerIndicator.change_state()
+        if self.game_mode == self.player_vs_computer:
+            self.game_mode = self.computer_vs_computer
+            self.gameMenu.playButton.action = self.game_mode
+            print("Computer vs computer set")
+        else:
+            self.game_mode = self.player_vs_computer
+            self.gameMenu.playButton.action = self.game_mode
+            print("Player vs computer set")
+
+    def on_off_sound(self):
+        self.gameOptions.soundIndicator.change_state()
+        if self.muted:
+            pygame.mixer.unpause()
+            pygame.mixer.music.play()
+            self.muted = False
+        else:
+            pygame.mixer.music.stop()
+            pygame.mixer.pause()
+            self.muted = True
+        self.gauntlet.muted = self.muted
 
     @classmethod
     def exit(cls):
