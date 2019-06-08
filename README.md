@@ -22,8 +22,8 @@ Algorithm together with heuristic function extends game created by
 
  * example:
  
- `Player1's deep: 2` <br>
- `Player2's deep: 4` <br>
+      `Player1's deep: 2` <br>
+      `Player2's deep: 4` <br>
 
 ### 3. Game rules
 
@@ -41,10 +41,6 @@ It's possible to capture by replacement (capture is not mandatory).
 * **Goal** - A player wins when he places one stone at the opponent throne.
 
 ### 4. Game options
-
-<p align="center">
-  <img width="600" height="600" src="resources/options-example.png">
-</p>
 
 * Turning sound on/off.
 * Choosing game mode between 'Playes vs Computer' and 'Computer vs Computer'
