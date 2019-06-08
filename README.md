@@ -21,8 +21,9 @@ Algorithm together with heuristic function extends game created by
  It is recommended for parameters to be within range 1-4.
 
  * example:
- Player1's deep: 2
- Player2's deep: 4
+ 
+ Player1's deep: 2 <br>
+ Player2's deep: 4 <br>
 
 ### 3. Game rules
 
