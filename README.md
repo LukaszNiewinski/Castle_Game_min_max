@@ -22,8 +22,8 @@ Algorithm together with heuristic function extends game created by
 
  * example:
  
- Player1's deep: 2 <br>
- Player2's deep: 4 <br>
+ `Player1's deep: 2` <br>
+ `Player2's deep: 4` <br>
 
 ### 3. Game rules
 
