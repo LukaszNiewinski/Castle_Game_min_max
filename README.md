@@ -16,8 +16,8 @@ Algorithm together with heuristic function extends game created by
 
 * For each player provide a parameter that definces a depth of the search tree.
  Higher value results in a better artificial inteligence of computer players.
- Games enables to watch a match between two computer players with different search depth.
- Computer with higher depth search value wins.
+ Game enables to watch a match between two computer players with different search depth.
+ Computer with higher depth search value wins. <br>
  It is recommended for parameters to be within range 1-4.
 
  * example:
