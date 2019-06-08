@@ -2,7 +2,9 @@
 
 An implementation of an artificial inteligence algorithm min-max with alfa-beta pruning.  
 Algorithm together with heuristic function extends game created by
-<a href="https://github.com/wojciech1871/PADPy-PD1">wojciech1871</a>.
+<a href="https://github.com/wojciech1871/PADPy-PD1">wojciech1871</a> and <a href="https://github.com/MichalTurski">MichalTurski</a>.
+
+
 
 ### 1. Requirements
 
